@@ -1,0 +1,16 @@
+{
+  "name": "Asana Importer",
+  "version": "0.0.1",
+  "author": "Rich Collins <richcollins@gmail.com>",
+  "description": "Asana Importer",
+  "dependencies": {
+    "ideal": "git://github.com/richcollins/ideal.git#0c0a22515566931bc11e4e558796b646aadd91bc",
+    "co": "3.1.0"
+	},
+  "engines": {
+    "node": "0.11.14"
+  },
+  "scripts": {
+    "start": "node bin/app.js"
+  }
+}
