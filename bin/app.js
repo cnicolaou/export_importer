@@ -8,8 +8,14 @@ var app = aei.App.shared();
 app.importer().setAsanaApiKey(process.env.ASANA_API_KEY);
 app.importer().setImportFilePath(process.env.IMPORT_FILE_PATH);
 
-(function(){
+var futureStart = function() {
 	app.start();
-}.future())();
+}.future();
+
+futureStart().resolve(function(err){
+	if (err) {
+		console.log(err);
+	}
+});
 
 //*/
