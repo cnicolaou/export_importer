@@ -5,3 +5,4 @@ profile
 node_modules
 export_importer.sublime-project
 export_importer.sublime-workspace
+db/*
