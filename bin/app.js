@@ -7,7 +7,7 @@ app.importer().setExport(ae.AsanaExport.clone().setPath(process.env.EXPORT_FILE_
 app.setApiClient(aei.asana.Client.basicAuth(process.env.ASANA_API_KEY));
 app.start().resolve(function(err){
 	if (err) {
-		console.log(err.stack);
+		console.log(err.stack || err);
 	}
 });
 
