@@ -1,15 +1,14 @@
-var ideal = require("ideal");
-var asana = require("asana");
-
+var ae = require("../lib/asana_export");
 var aei = require("../lib/asana_export_importer");
 
 //*
 var app = aei.App.shared();
-app.importer().setAsanaApiKey(process.env.ASANA_API_KEY);
-app.importer().setImportFilePath(process.env.IMPORT_FILE_PATH);
-
-(function(){
-	app.start();
-}.future())();
+app.importer().setExport(ae.AsanaExport.clone().setPath(process.env.EXPORT_FILE_PATH));
+app.setApiClient(aei.asana.Client.basicAuth(process.env.ASANA_API_KEY));
+app.start().resolve(function(err){
+	if (err) {
+		console.log(err.stack || err);
+	}
+});
 
 //*/
