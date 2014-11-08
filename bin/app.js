@@ -3,8 +3,8 @@ var aei = require("../lib/asana_export_importer");
 
 //*
 
-//aei.Team.replacePostCreateWithFind(); //TODO
-//aei.Project.replacePostCreateWithFind(); //TODO
+//aei.Team.__replaceCreateWithFind(); //TODO
+//aei.Project.__replaceCreateWithFind(); //TODO
 
 var app = aei.App.shared();
 app.importer().setExport(ae.AsanaExport.clone().setPath(process.env.EXPORT_FILE_PATH));
