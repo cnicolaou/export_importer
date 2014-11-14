@@ -17,7 +17,7 @@
   },
   "scripts": {
     "start": "node bin/app.js",
-    "test": "./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha -- --ui mocha-fibers --recursive -R spec -r should"
+    "test": "./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha -- --ui mocha-fibers --recursive -R spec"
   },
   "devDependencies": {
     "istanbul": "^0.3.2",
