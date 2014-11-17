@@ -5,24 +5,26 @@ var docopt = require("docopt").docopt;
 
 doc =
 "Usage:\n"+
-"  asana_export_importer [--importer=<type>] [--api-key=<key>] [--workspace=<id>] [--api-endpoint=<url>] <path>\n" +
+"  asana_export_importer [options] <path>\n" +
 "  asana_export_importer --help\n" +
 "  asana_export_importer --version\n" +
 "\n" + 
 "Options:\n" + 
 "  --importer=<type>     Export source type [default: asana_export].\n" + 
-"  --workspace=<id>      Asana workspace ID [default: 8737056890891].\n" +
+"  --organization=<id>   Asana organization ID [default: 8737056890891].\n" +
 "  --api-key=<key>       Asana API key [default: 5IhOYQE4.CpDycmK7AssYDix0zIvsgVn].\n" + 
-"  --api-endpoint=<url>  Asana API endpoint [default: " + aei.asana.Dispatcher.ROOT_URL + "]"
+"  --api-endpoint=<url>  Asana API endpoint [default: " + aei.asana.Dispatcher.ROOT_URL + "]\n" +
+"  --attachments=<file>  Attachments file to write to [default: db/attachments.json]\n" +
 "  -h --help             Show this screen.\n" + 
 "  --version             Show version."
 
 var opts = docopt(doc, { version: '0.0.1' });
 
 var exportModule = opts["--importer"];
-var workspace = opts["--workspace"];
+var organization = parseInt(opts["--organization"], 10);
 var apiKey = opts["--api-key"];
 var apiEndpoint = opts["--api-endpoint"];
+var attachmentsPath = opts["--attachments"];
 var path = opts["<path>"];
 
 if (exportModule === "asana_export") {
@@ -44,12 +46,12 @@ if (apiEndpoint !== aei.asana.Dispatcher.ROOT_URL) {
 var app = aei.App.shared();
 
 app.importer().setExport(ExportImplementation.clone().setPath(path));
-app.importer().setOrganizationId(workspace);
+app.importer().setOrganizationId(organization);
 
 app.setApiClient(aei.asana.Client.basicAuth(apiKey));
 // app.setApiClient(aei.MockApiClient.clone()); //TODO
 
-app.setAttachmentsPath(process.env.ATTACHMENTS_FILE_PATH || "db/attachments.json");
+app.setAttachmentsPath(attachmentsPath);
 app.start().resolve(function(err){
 	if (err) {
 		console.log(err.stack || err);
