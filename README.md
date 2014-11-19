@@ -4,27 +4,54 @@ Asana Export Importer
 Setup
 -----
 
-1. Ensure Node.js v0.10 and SQLite3 are installed.
+1. Ensure Node.js v0.10 is installed.
 2. In the project directory run:
 
 	npm install
-
-Example
--------
-
-	bin/asana_export_importer example/export.json
-
-You can also specify an importer, organization ID to import into, Asana API key and endpoint, and location to write the attachments list. The following example shows the defaults:
-
-	bin/asana_export_importer \
-		--importer=asana_export \
-		--organization=8737056890891 \
-		--api-key=5IhOYQE4.CpDycmK7AssYDix0zIvsgVn \
-		--api-endpoint=https://app.asana.com/api/1.0 \
-		--attachments=db/attachments.json \
-		example/export.json
 
 Testing
 -------
 
 	npm test
+
+Usage
+-----
+
+The minimum required command line requirements are an API key, organization ID, and export data file:
+
+	asana_export_importer \
+		--organization=20556533848969 \
+		--api-key=5PUmeLPC.tJAE8kFo3vduEtXW9kSgw8x \
+		example/export.json
+
+You can also specify an importer, organization ID to import into, Asana API key and endpoint, and location to write the attachments list (defaults shown below):
+
+	asana_export_importer \
+		--importer=asana_export \
+		--organization=20556533848969 \
+		--api-key=5PUmeLPC.tJAE8kFo3vduEtXW9kSgw8x \
+		--api-endpoint=https://app.asana.com/api/1.0 \
+		--attachments=db/attachments.json \
+		example/export.json
+
+Demo
+----
+
+Run the following to import an example Asana export into a sample organization (Asana user=asanabot@importsandbox.alexd-test-subdomain.asana.com password=a5anab0t)
+
+	example/example.sh
+
+Docker
+------
+
+A Dockerfile is provided that includes the Node.js dependency.
+
+The following does the same thing as the demo script above:
+
+	docker build -t asana_export_importer .
+	docker run -t asana_export_importer
+
+You can also use a volume to mount your own export file in the container:
+
+	docker run -t -v /path/to/export.json:/data/export.json asana_export_importer \
+		bin/asana_export_importer --api-key=$ASANA_API_KEY --organization=$ASANA_ORGANIZATION /data/export.json
