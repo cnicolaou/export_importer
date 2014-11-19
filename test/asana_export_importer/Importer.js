@@ -150,50 +150,6 @@ describe("Importer", function() {
 		});
 	});
 
-	describe("#_importSubtasks", function() {
-		it("should update the subtask with the correct parent task ID", function() {
-			exp.setMockData({
-				tasks: [
-					{ sourceId: 100, name: "task foo", sourceProjectIds: [], sourceTagIds: [], sourceFollowerIds: [] },
-					{ sourceId: 101, name: "subtask foo", sourceProjectIds: [], sourceTagIds: [], sourceFollowerIds: [], sourceParentId: 100 }
-				]
-			});
-
-			importer._importTasks();
-			importer._importSubtasks();
-
-			client.tasks.setParent.should.have.been.calledOnce;
-			client.tasks.setParent.should.have.been.calledWithExactly(app.sourceToAsanaMap().at(101), { parent: app.sourceToAsanaMap().at(100) });
-		});
-	});
-
-	describe("#_importTaskTags", function() {
-		it("should add the correct tag to a task", function() {
-			exp.setMockData({
-				tags: [{ sourceId: 100, name: "tag foo", sourceTeamId: null }],
-				tasks: [{ sourceId: 101, name: "task foo", sourceProjectIds: [], sourceTagIds: [100], sourceFollowerIds: [] }]
-			});
-
-			importer._importTags();
-			importer._importTasks();
-			importer._importTaskTags();
-
-			client.tasks.addTag.should.have.been.calledOnce;
-		});
-
-		it("should not crash if a task doesn't exist", function() {
-			exp.setMockData({
-				tasks: [{ sourceId: 101, name: "task foo", sourceProjectIds: [], sourceTagIds: [100], sourceFollowerIds: [] }]
-			});
-
-			importer._importTags();
-			importer._importTasks();
-			importer._importTaskTags();
-
-			client.tasks.addTag.should.not.have.been.called;
-		});
-	});
-
 	describe("#_importStories", function() {
 		it("should add a story to the correct task", function() {
 			exp.setMockData({
@@ -214,6 +170,50 @@ describe("Importer", function() {
 		});
 	});
 
+	describe("#_addSubtasksToTasks", function() {
+		it("should update the subtask with the correct parent task ID", function() {
+			exp.setMockData({
+				tasks: [
+					{ sourceId: 100, name: "task foo", sourceProjectIds: [], sourceTagIds: [], sourceFollowerIds: [] },
+					{ sourceId: 101, name: "subtask foo", sourceProjectIds: [], sourceTagIds: [], sourceFollowerIds: [], sourceParentId: 100 }
+				]
+			});
+
+			importer._importTasks();
+			importer._addSubtasksToTasks();
+
+			client.tasks.setParent.should.have.been.calledOnce;
+			client.tasks.setParent.should.have.been.calledWithExactly(app.sourceToAsanaMap().at(101), { parent: app.sourceToAsanaMap().at(100) });
+		});
+	});
+
+	describe("#_addTasksToTags", function() {
+		it("should add the correct tag to a task", function() {
+			exp.setMockData({
+				tags: [{ sourceId: 100, name: "tag foo", sourceTeamId: null }],
+				tasks: [{ sourceId: 101, name: "task foo", sourceProjectIds: [], sourceTagIds: [100], sourceFollowerIds: [] }]
+			});
+
+			importer._importTags();
+			importer._importTasks();
+			importer._addTasksToTags();
+
+			client.tasks.addTag.should.have.been.calledOnce;
+		});
+
+		it("should not crash if a task doesn't exist", function() {
+			exp.setMockData({
+				tasks: [{ sourceId: 101, name: "task foo", sourceProjectIds: [], sourceTagIds: [100], sourceFollowerIds: [] }]
+			});
+
+			importer._importTags();
+			importer._importTasks();
+			importer._addTasksToTags();
+
+			client.tasks.addTag.should.not.have.been.called;
+		});
+	});
+
 	describe("#_importUsers", function() {
 		it("should add a user to the correct workspace", function() {
 			exp.setMockData({
@@ -227,17 +227,22 @@ describe("Importer", function() {
 		});
 	});
 
-	describe("#_addUsersToTeams", function() {
+	describe("#_addAssigneesToTasks", function() {
 		it("", function() {
 		});
 	});
 
-	describe("#_addUsersToProjects", function() {
+	describe("#_addFollowersToTasks", function() {
 		it("", function() {
 		});
 	});
 
-	describe("#_addUsersToTasks", function() {
+	describe("#_addMembersToTeams", function() {
+		it("", function() {
+		});
+	});
+
+	describe("#_addMembersToProjects", function() {
 		it("", function() {
 		});
 	});
