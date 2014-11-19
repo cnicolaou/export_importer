@@ -17,7 +17,7 @@
     "node": "0.10.33"
   },
   "scripts": {
-    "start": "node bin/app.js",
+    "start": "node bin/asana_export_importer",
     "test": "./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha -- --ui mocha-fibers --recursive -R spec"
   },
   "bin" : {

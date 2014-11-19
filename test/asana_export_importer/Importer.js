@@ -91,6 +91,7 @@ describe("Importer", function() {
 			importer._importProjects();
 
 			client.projects.create.should.have.been.calledOnce;
+			client.tags.create.should.not.have.been.called;
 			client.projects.create.getCall(0).args[0]['team'].should.equal(app.sourceToAsanaMap().at(100))
 		});
 	});
@@ -104,6 +105,7 @@ describe("Importer", function() {
 			importer._importTags();
 
 			client.tags.createInWorkspace.should.have.been.calledOnce;
+			client.projects.create.should.not.have.been.called;
 			importer._tags.should.have.length(1);
 		});
 
@@ -115,6 +117,7 @@ describe("Importer", function() {
 
 			importer._importTags();
 
+			client.tags.create.should.not.have.been.called;
 			client.tags.createInWorkspace.should.not.have.been.called;
 			importer._tags.should.have.length(1);
 		});

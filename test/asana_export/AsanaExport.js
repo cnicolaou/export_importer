@@ -147,7 +147,7 @@ describe("AsanaExport", function() {
 			exp.storyCursorDataSource()(0, 50).should.deep.equal([]);
 		});
 
-		it("should return two stories with reformatted texts, and exclude TaskDescriptionChangedStory", function() {
+		it("should return two stories with reformatted texts", function() {
 			lines = [
 				{ __object_id: 1, __type: "User", name: "mike" },
 				{ __object_id: 2, __type: "VerifiedEmail", ve_user: 1, ve_email: "mike@example.com" },
@@ -160,7 +160,8 @@ describe("AsanaExport", function() {
 			exp.prepareForImport();
 			exp.storyCursorDataSource()(0, 50).mapPerform("performGets", ["sourceId", "text", "sourceParentId"]).should.deep.equal([
 				{ sourceId: 5, text: "mike commented on Mon Nov 17 2014 22:44:22:\n\nMY COMMENT", sourceParentId: 4 },
-				{ sourceId: 6, text: "mike changed the name to \"task1\"", sourceParentId: 4 }
+				{ sourceId: 6, text: "mike changed the name to \"task1\"", sourceParentId: 4 },
+				{ sourceId: 7, sourceParentId: 4, text: "mike removed the description" }
 			]);
 		});
 	});
