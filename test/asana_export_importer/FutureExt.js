@@ -20,7 +20,7 @@ describe("Array", function() {
 			var x = [];
 			[1,2].forEachParallel(function(i) {
 				x.push(100+i);
-				sleep(0);
+				sleep(10);
 				x.push(200);
 			});
 			x.should.deep.equal([101, 102, 200, 200]);
@@ -34,6 +34,16 @@ describe("Array", function() {
 			}
 			func.should.throw("Some error");
 		});
+
+		it("should respect parallelism argument", function() {
+			var x = [];
+			[1,2,3,4].forEachParallel(function(i) {
+				x.push(100+i);
+				sleep(10);
+				x.push(200);
+			}, null, 2);
+			x.should.deep.equal([101, 102, 200, 200, 103, 104, 200, 200]);
+		});
 	});
 
 	describe("#mapParallel", function() {
@@ -41,7 +51,7 @@ describe("Array", function() {
 			var x = [];
 			var y = [1,2].mapParallel(function(i) {
 				x.push(100 + i);
-				sleep(0);
+				sleep(10);
 				x.push(200);
 				return 300 + i;
 			});
