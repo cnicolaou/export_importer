@@ -5,14 +5,14 @@ var docopt = require("docopt").docopt;
 
 doc =
 "Usage:\n"+
-"  asana_export_importer [options] <path>\n" +
+"  asana_export_importer --api-key=<key> --organization=<id> [options] <path>\n" +
 "  asana_export_importer --help\n" +
 "  asana_export_importer --version\n" +
 "\n" + 
 "Options:\n" + 
 "  --importer=<type>     Export source type [default: asana_export].\n" + 
-"  --organization=<id>   Asana organization ID [default: 8737056890891].\n" +
-"  --api-key=<key>       Asana API key [default: 5IhOYQE4.CpDycmK7AssYDix0zIvsgVn].\n" + 
+"  --organization=<id>   Asana organization ID.\n" +
+"  --api-key=<key>       Asana API key.\n" +
 "  --api-endpoint=<url>  Asana API endpoint [default: " + aei.asana.Dispatcher.ROOT_URL + "]\n" +
 "  --attachments=<file>  Attachments file to write to [default: db/attachments.json]\n" +
 "  -h --help             Show this screen.\n" + 
