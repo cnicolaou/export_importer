@@ -1,0 +1,59 @@
+#!/usr/bin/env node
+
+var aei = require("../lib/asana_export_importer");
+var docopt = require("docopt").docopt;
+
+doc =
+"Usage:\n"+
+"  asana_export_importer [options] <path>\n" +
+"  asana_export_importer --help\n" +
+"  asana_export_importer --version\n" +
+"\n" + 
+"Options:\n" + 
+"  --importer=<type>     Export source type [default: asana_export].\n" + 
+"  --organization=<id>   Asana organization ID [default: 8737056890891].\n" +
+"  --api-key=<key>       Asana API key [default: 5IhOYQE4.CpDycmK7AssYDix0zIvsgVn].\n" + 
+"  --api-endpoint=<url>  Asana API endpoint [default: " + aei.asana.Dispatcher.ROOT_URL + "]\n" +
+"  --attachments=<file>  Attachments file to write to [default: db/attachments.json]\n" +
+"  -h --help             Show this screen.\n" + 
+"  --version             Show version."
+
+var opts = docopt(doc, { version: '0.0.1' });
+
+var exportModule = opts["--importer"];
+var organization = parseInt(opts["--organization"], 10);
+var apiKey = opts["--api-key"];
+var apiEndpoint = opts["--api-endpoint"];
+var attachmentsPath = opts["--attachments"];
+var path = opts["<path>"];
+
+if (exportModule === "asana_export") {
+	var ExportImplementation = require("../lib/asana_export").ExportImplementation; 
+} else {
+	var ExportImplementation = require(exportModule).ExportImplementation;
+}
+
+if (ExportImplementation == undefined) {
+	console.log("Missing 'ExportImplementation' in module '" + exportModule + "'");
+	process.exit(1);
+}
+
+if (apiEndpoint !== aei.asana.Dispatcher.ROOT_URL) {
+	console.log("Setting API endpoint to " + apiEndpoint);
+	aei.asana.Dispatcher.ROOT_URL = apiEndpoint;
+}
+
+var app = aei.App.shared();
+
+app.importer().setExport(ExportImplementation.clone().setPath(path));
+app.importer().setOrganizationId(organization);
+
+app.setApiClient(aei.asana.Client.basicAuth(apiKey));
+// app.setApiClient(aei.MockApiClient.clone()); //TODO
+
+app.setAttachmentsPath(attachmentsPath);
+app.start().resolve(function(err){
+	if (err) {
+		console.log(err.stack || err);
+	}
+});

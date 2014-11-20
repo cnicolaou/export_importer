@@ -214,13 +214,13 @@ describe("Importer", function() {
 	describe("#_importUsers", function() {
 		it("should add a user to the correct workspace", function() {
 			exp.setMockData({
-				users: [{ sourceId: 100, name: "mike", asanaId: 100 }]
+				users: [{ sourceId: 100, name: "mike", email: "mike@example.com", asanaId: 100 }]
 			});
 
 			importer._importUsers();
 
 			client.workspaces.addUser.should.have.been.calledOnce;
-			client.workspaces.addUser.should.have.been.calledWithExactly(importer.organizationId(), { user: 100, opt_silent: true });
+			client.workspaces.addUser.should.have.been.calledWithExactly(importer.organizationId(), { user: "mike@example.com", opt_silent: true });
 		});
 	});
 
