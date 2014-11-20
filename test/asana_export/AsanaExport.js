@@ -122,7 +122,7 @@ describe("AsanaExport", function() {
 			exp.taskCursorDataSource()(0, 50).should.deep.equal([]);
 		});
 
-		it("should return one task and subtask with project, tag, assignee, follower", function() {
+		it("should return one task and subtask with assignee and follower", function() {
 			lines = [
 				{ __object_id: 1, __type: "User", name: "mike" },
 				{ __object_id: 2, __type: "VerifiedEmail", ve_user: 1, ve_email: "mike@example.com" },
@@ -134,9 +134,9 @@ describe("AsanaExport", function() {
 				{ __object_id: 8, __type: "Task", name: "subtask1", schedule_status: "UPCOMING", due_date:"2023-11-30 00:00:00", description: "description", assignee: 3, attachments: [], items: [], stories: [], followers_du: [3] },
 			]
 			exp.prepareForImport();
-			exp.taskCursorDataSource()(0, 50).mapPerform("performGets", ["sourceId", "name", "notes", "completed", "assigneeStatus", "dueOn", "sourceParentId", "sourceAssigneeId", "sourceProjectIds", "sourceTagIds", "sourceFollowerIds"]).should.deep.equal([
-				{ sourceId: 7, name: "task1", notes: "description", completed: false, dueOn: "2023-11-30 00:00:00", assigneeStatus: "upcoming", sourceParentId: undefined, sourceAssigneeId: 1, sourceProjectIds: [5], sourceTagIds: [6], sourceFollowerIds: [1] },
-				{ sourceId: 8, name: "subtask1", notes: "description", completed: false, dueOn: "2023-11-30 00:00:00", assigneeStatus: "upcoming", sourceParentId: 7, sourceAssigneeId: 1, sourceProjectIds: [], sourceTagIds: [], sourceFollowerIds: [1] }
+			exp.taskCursorDataSource()(0, 50).mapPerform("performGets", ["sourceId", "name", "notes", "completed", "assigneeStatus", "dueOn", "sourceItemIds", "sourceAssigneeId", "sourceFollowerIds"]).should.deep.equal([
+				{ sourceId: 7, name: "task1",    notes: "description", completed: false, dueOn: "2023-11-30 00:00:00", assigneeStatus: "upcoming", sourceItemIds: [8], sourceAssigneeId: 1, sourceFollowerIds: [1] },
+				{ sourceId: 8, name: "subtask1", notes: "description", completed: false, dueOn: "2023-11-30 00:00:00", assigneeStatus: "upcoming", sourceItemIds: [],  sourceAssigneeId: 1, sourceFollowerIds: [1] }
 			]);
 		});
 	});
