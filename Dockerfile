@@ -3,6 +3,8 @@ FROM node:0.10.33
 WORKDIR /app
 
 ADD package.json /app/package.json
+RUN npm install
+
 ADD bin /app/bin
 ADD lib /app/lib
 ADD test /app/test
@@ -10,8 +12,6 @@ ADD test /app/test
 ADD example/export.json /data/export.json
 
 RUN mkdir db
-
-RUN npm install
 RUN npm test
 
 # Asana user=asanabot@importsandbox.alexd-test-subdomain.asana.com password=a5anab0t
