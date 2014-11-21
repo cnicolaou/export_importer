@@ -38,6 +38,17 @@ describe("AsanaExport", function() {
 				{ sourceId: 1, name: "mike", email: "mike@example.com", sourceItemIds: [10,11,12] }
 			]);
 		});
+
+		it("should not return deactivated users", function() {
+			lines = [
+				{ __object_id: 1, __type: "User", name: "mike", deactivated: true },
+				{ __object_id: 2, __type: "VerifiedEmail", ve_user: 1, ve_email: "mike@example.com" },
+				{ __object_id: 3, __type: "DomainUser", user: 1, task_list: 4 },
+				{ __object_id: 4, __type: "ItemList", followers_du: [], name: "My Tasks", is_project: true, assignee: 3, is_archived: false, items: [10,11,12] },
+			]
+			exp.prepareForImport();
+			exp.users().mapPerform("performGets", ["email", "name", "sourceId", "sourceItemIds"]).should.deep.equal([]);
+		});
 	});
 
 	describe("#teams()", function() {
@@ -179,6 +190,25 @@ describe("AsanaExport", function() {
 				{ sourceId: 6, text: "mike changed the name to \"task1\"", sourceParentId: 4 },
 				{ sourceId: 7, sourceParentId: 4, text: "mike removed the description" }
 			]);
+		});
+
+		it("should not return trashed Tasks", function() {
+			lines = [
+				{ __object_id: 1, __type: "Task", __trashed_at: "2023-11-30 00:00:00", name: "task1", schedule_status: "UPCOMING", due_date:"2023-11-30 00:00:00", description: "description", attachments: [], items: [], stories: [], followers_du: [] },
+			]
+			exp.prepareForImport();
+			exp.taskCursorDataSource()(0, 50).mapPerform("performGets", ["sourceId", "name", "notes", "completed", "assigneeStatus", "dueOn", "sourceItemIds", "sourceAssigneeId", "sourceFollowerIds"]).should.deep.equal([]);
+		});
+
+		it("should paginate cursor correctly", function() {
+			lines = [
+				{ __object_id: 1, __type: "Task", name: "task1", schedule_status: "UPCOMING", description: "", attachments: [], items: [], stories: [], followers_du: [] },
+				{ __object_id: 2, __type: "Task", name: "task2", schedule_status: "UPCOMING", description: "", attachments: [], items: [], stories: [], followers_du: [] },
+			]
+			exp.prepareForImport();
+			exp.taskCursorDataSource()(0, 1).length.should.equal(1);
+			exp.taskCursorDataSource()(1, 1).length.should.equal(1);
+			exp.taskCursorDataSource()(2, 1).length.should.equal(0);
 		});
 	});
 
