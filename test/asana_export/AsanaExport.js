@@ -31,7 +31,7 @@ describe("AsanaExport", function() {
 				{ __object_id: 1, __type: "User", name: "mike" },
 				{ __object_id: 2, __type: "VerifiedEmail", ve_user: 1, ve_email: "mike@example.com" },
 				{ __object_id: 3, __type: "DomainUser", user: 1, task_list: 4 },
-				{ __object_id: 4, __type: "Pot", followers_du: [], name: "My Tasks", is_project: true, assignee: 3, is_archived: false, items: [10,11,12] },
+				{ __object_id: 4, __type: "ItemList", followers_du: [], name: "My Tasks", is_project: true, assignee: 3, is_archived: false, items: [10,11,12] },
 			]
 			exp.prepareForImport();
 			exp.users().mapPerform("performGets", ["email", "name", "sourceId", "sourceItemIds"]).should.deep.equal([
@@ -83,9 +83,9 @@ describe("AsanaExport", function() {
 				{ __object_id: 2, __type: "VerifiedEmail", ve_user: 1, ve_email: "mike@example.com" },
 				{ __object_id: 3, __type: "DomainUser", user: 1 },
 				{ __object_id: 4, __type: "Team", name: "team1", team_type: "REQUEST_TO_JOIN" },
-				{ __object_id: 5, __type: "Pot", followers_du: [], name: "project1", description: "description", is_project: true, is_archived: false, items: [10,11,12], team: 4, stories: [] },
-				{ __object_id: 6, __type: "Pot", followers_du: [], name: "tag1", is_project: false, is_archived: false, items: [10,11,12], team: 4, stories: [] },
-				{ __object_id: 7, __type: "Pot", followers_du: [], name: "My Tasks", is_project: true, assignee: 3, is_archived: false, items: [10,11,12] },
+				{ __object_id: 5, __type: "ItemList", followers_du: [], name: "project1", description: "description", is_project: true, is_archived: false, items: [10,11,12], team: 4, stories: [] },
+				{ __object_id: 6, __type: "ItemList", followers_du: [], name: "tag1", is_project: false, is_archived: false, items: [10,11,12], team: 4, stories: [] },
+				{ __object_id: 7, __type: "ItemList", followers_du: [], name: "My Tasks", is_project: true, assignee: 3, is_archived: false, items: [10,11,12] },
 				{ __object_id: 8, __type: "ProjectMembership", project: 5, member: 3 }
 			]
 			exp.prepareForImport();
@@ -107,9 +107,9 @@ describe("AsanaExport", function() {
 				{ __object_id: 2, __type: "VerifiedEmail", ve_user: 1, ve_email: "mike@example.com" },
 				{ __object_id: 3, __type: "DomainUser", user: 1 },
 				{ __object_id: 4, __type: "Team", name: "team1", team_type: "REQUEST_TO_JOIN" },
-				{ __object_id: 5, __type: "Pot", followers_du: [], name: "project1", description: "description", is_project: true, is_archived: false, items: [10,11,12], team: 4, stories: [] },
-				{ __object_id: 6, __type: "Pot", followers_du: [], name: "tag1", is_project: false, is_archived: false, items: [10,11,12], team: 4, stories: [] },
-				{ __object_id: 7, __type: "Pot", followers_du: [], name: "My Tasks", is_project: true, assignee: 3, is_archived: false, items: [10,11,12] }
+				{ __object_id: 5, __type: "ItemList", followers_du: [], name: "project1", description: "description", is_project: true, is_archived: false, items: [10,11,12], team: 4, stories: [] },
+				{ __object_id: 6, __type: "ItemList", followers_du: [], name: "tag1", is_project: false, is_archived: false, items: [10,11,12], team: 4, stories: [] },
+				{ __object_id: 7, __type: "ItemList", followers_du: [], name: "My Tasks", is_project: true, assignee: 3, is_archived: false, items: [10,11,12] }
 			]
 			exp.prepareForImport();
 			exp.tags().mapPerform("performGets", ["sourceId", "name", "sourceTeamId", "sourceItemIds"]).should.deep.equal([
@@ -130,8 +130,8 @@ describe("AsanaExport", function() {
 				{ __object_id: 2, __type: "VerifiedEmail", ve_user: 1, ve_email: "mike@example.com" },
 				{ __object_id: 3, __type: "DomainUser", user: 1 },
 				{ __object_id: 4, __type: "Team", name: "team1", team_type: "REQUEST_TO_JOIN" },
-				{ __object_id: 5, __type: "Pot", followers_du: [], name: "project1", description: "description", is_project: true, is_archived: false, items: [7], team: 4, stories: [] },
-				{ __object_id: 6, __type: "Pot", followers_du: [], name: "tag1", is_project: false, is_archived: false, items: [7], team: 4, stories: [] },
+				{ __object_id: 5, __type: "ItemList", followers_du: [], name: "project1", description: "description", is_project: true, is_archived: false, items: [7], team: 4, stories: [] },
+				{ __object_id: 6, __type: "ItemList", followers_du: [], name: "tag1", is_project: false, is_archived: false, items: [7], team: 4, stories: [] },
 				{ __object_id: 7, __type: "Task", name: "task1", schedule_status: "UPCOMING", due_date:"2023-11-30 00:00:00", description: "description", assignee: 3, attachments: [], items: [8], stories: [], followers_du: [3] },
 				{ __object_id: 8, __type: "Task", name: "subtask1", schedule_status: "UPCOMING", due_date:"2023-11-30 00:00:00", description: "description", assignee: 3, attachments: [], items: [], stories: [], followers_du: [3] },
 			]
@@ -155,7 +155,7 @@ describe("AsanaExport", function() {
 				{ __object_id: 2, __type: "VerifiedEmail", ve_user: 1, ve_email: "mike@example.com" },
 				{ __object_id: 3, __type: "DomainUser", user: 1 },
 				{ __object_id: 4, __type: "Task", name: "task1", schedule_status: "UPCOMING", due_date:"2023-11-30 00:00:00", description: "description", attachments: [2], items: [], stories: [5, 6, 7], followers_du: [] },
-				{ __object_id: 5, __type: "CommentStory", creator_du: 3, __creation_time: "2014-11-17 22:44:22", text: "MY COMMENT" },
+				{ __object_id: 5, __type: "Comment", creator_du: 3, __creation_time: "2014-11-17 22:44:22", text: "MY COMMENT" },
 				{ __object_id: 6, __type: "TaskNameChangedStory", creator_du: 3, __creation_time: "2014-11-17 22:44:22", text: "changed the name to \"task1\"" },
 				{ __object_id: 7, __type: "TaskDescriptionChangedStory", creator_du: 3, __creation_time: "2014-11-17 22:44:22", text: "removed the description" }
 			]
