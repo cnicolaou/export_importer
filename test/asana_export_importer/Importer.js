@@ -102,16 +102,33 @@ describe("Importer", function() {
 	});
 
 	describe("#_importTags()", function() {
-		it("should create a tag", function() {
+		it("should create a tag with name", function() {
 			exp.setMockData({
-				tags: [{ sourceId: 1, name: "tag foo", sourceTeamId: null }]
+				tags: [{ sourceId: 100, name: "tag1", sourceTeamId: null }]
 			});
 
 			importer._importTags();
 
-			client.tags.createInWorkspace.should.have.been.calledOnce;
-			client.projects.create.should.not.have.been.called;
 			importer._tags.should.have.length(1);
+			client.tags.createInWorkspace.should.have.been.calledOnce;
+			client.tags.createInWorkspace.should.have.been.calledWithExactly(app.sourceToAsanaMap().at(100), { name: "tag1", team: null });
+		});
+
+		it("should create a tag with name and team", function() {
+			exp.setMockData({
+				tags: [{ sourceId: 100, name: "tag1", sourceTeamId: 200 }],
+				teams: [{ sourceId: 200, name: "team1", teamType: "PUBLIC", sourceMemberIds: [] }]
+			});
+
+			importer._importTeams();
+			importer._importTags();
+
+			importer._tags.should.have.length(1);
+			client.tags.createInWorkspace.should.have.been.calledOnce;
+			client.tags.createInWorkspace.should.have.been.calledWithExactly(app.sourceToAsanaMap().at(100), {
+				name: "tag1",
+				team: app.sourceToAsanaMap().at(200)
+			});
 		});
 
 		it("should not create duplicate tags", function() {
@@ -204,8 +221,8 @@ describe("Importer", function() {
 			importer._addTasksToProjects();
 
 			client.tasks.addProject.should.have.been.called;
-			client.tasks.addProject.getCall(0).args.should.deep.equal([app.sourceToAsanaMap().at(300), { projectId: app.sourceToAsanaMap().at(200) }]);
-			client.tasks.addProject.getCall(1).args.should.deep.equal([app.sourceToAsanaMap().at(301), { projectId: app.sourceToAsanaMap().at(200) }]);
+			client.tasks.addProject.getCall(0).args.should.deep.equal([app.sourceToAsanaMap().at(300), { project: app.sourceToAsanaMap().at(200) }]);
+			client.tasks.addProject.getCall(1).args.should.deep.equal([app.sourceToAsanaMap().at(301), { project: app.sourceToAsanaMap().at(200) }]);
 		});
 	});
 
@@ -243,8 +260,8 @@ describe("Importer", function() {
 	describe("#_addAssigneesToTasks", function() {
 		it("should set the assignee of a task", function() {
 			exp.setMockData({
-				users: [{ sourceId: 100, name: "user1", email: "user1@example.com" }],
-				tasks: [{ sourceId: 101, name: "task1", sourceFollowerIds: [], sourceAssigneeId: 100 }]
+				users: [{ sourceId: 100, name: "user1", email: "user1@example.com", sourceItemIds: [101] }],
+				tasks: [{ sourceId: 101, name: "task1", sourceFollowerIds: [] }]
 			});
 
 			importer._importTasks();
