@@ -13,6 +13,8 @@ describe("Importer", function() {
 	var client = null;
 
 	beforeEach(function() {
+		sandbox = sinon.sandbox.create();
+
 		app.setSourceToAsanaMap(aei.SourceToAsanaMap.clone());
 
 		importer = aei.Importer.clone();
@@ -37,6 +39,10 @@ describe("Importer", function() {
 		sinon.spy(client.teams, "addUser");
 		sinon.spy(client.projects, "addMembers");
 		sinon.spy(client.workspaces, "addUser");
+	});
+	
+	afterEach(function() {
+		sandbox.restore();
 	});
 
 	describe("#run()", function() {
@@ -173,7 +179,26 @@ describe("Importer", function() {
 	});
 
 	describe("#_importAttachments", function() {
-		it("", function() {
+		var fs = require("fs");
+
+		it("should write the attachment ids to a file", function() {
+			sandbox.stub(fs, "appendFile", function (path, text, callback) {
+				callback(null);
+			});
+
+			exp.setMockData({
+				tasks: [{ sourceId: 100, name: "task1", sourceFollowerIds: [], sourceItemIds: [] }],
+				attachments: [{ sourceId: 200, sourceParentId: 100 }]
+			});
+
+			app.setAttachmentsPath("attachments.json");
+
+			importer._importTasks();
+			importer._importAttachments();
+
+			fs.appendFile.getCall(0).args[0].should.equal("attachments.json");
+			fs.appendFile.getCall(0).args[1].should.match(/^\{[^\n]+\}\n$/);
+			JSON.parse(fs.appendFile.getCall(0).args[1]).should.deep.equal({ sourceId: 200, task: app.sourceToAsanaMap().at(100) });
 		});
 	});
 
