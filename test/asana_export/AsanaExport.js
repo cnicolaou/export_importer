@@ -62,11 +62,25 @@ describe("AsanaExport", function() {
 				{ __object_id: 2, __type: "VerifiedEmail", ve_user: 1, ve_email: "mike@example.com" },
 				{ __object_id: 3, __type: "DomainUser", user: 1 },
 				{ __object_id: 4, __type: "Team", name: "team1", team_type: "REQUEST_TO_JOIN" },
-				{ __object_id: 5, __type: "TeamMembership", "team": 4, "member": 3 }
+				{ __object_id: 5, __type: "TeamMembership", team: 4, member: 3 }
 			]
 			exp.prepareForImport();
 			exp.teams().mapPerform("performGets", ["sourceId", "name", "teamType", "sourceMemberIds"]).should.deep.equal([
 				{ sourceId: 4, name: "team1", teamType: "REQUEST_TO_JOIN", sourceMemberIds: [1] }
+			]);
+		});
+
+		it("should not include 'limited_access=true' users in a team", function() {
+			lines = [
+				{ __object_id: 1, __type: "User", name: "mike" },
+				{ __object_id: 2, __type: "VerifiedEmail", ve_user: 1, ve_email: "mike@example.com" },
+				{ __object_id: 3, __type: "DomainUser", user: 1 },
+				{ __object_id: 4, __type: "Team", name: "team1", team_type: "REQUEST_TO_JOIN" },
+				{ __object_id: 5, __type: "TeamMembership", team: 4, member: 3, limited_access: true }
+			]
+			exp.prepareForImport();
+			exp.teams().mapPerform("performGets", ["sourceId", "name", "teamType", "sourceMemberIds"]).should.deep.equal([
+				{ sourceId: 4, name: "team1", teamType: "REQUEST_TO_JOIN", sourceMemberIds: [] }
 			]);
 		});
 	});
