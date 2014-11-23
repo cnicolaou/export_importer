@@ -166,6 +166,25 @@ describe("AsanaExport", function() {
 				{ sourceId: 8, name: "subtask1", notes: "description", completed: false, dueOn: "2023-11-30 00:00:00", assigneeStatus: "upcoming", sourceItemIds: [],  sourceAssigneeId: 1, sourceFollowerIds: [1] }
 			]);
 		});
+
+		it("should not return trashed Tasks", function() {
+			lines = [
+				{ __object_id: 1, __type: "Task", __trashed_at: "2023-11-30 00:00:00", name: "task1", schedule_status: "UPCOMING", due_date:"2023-11-30 00:00:00", description: "description", attachments: [], items: [], stories: [], followers_du: [] },
+			]
+			exp.prepareForImport();
+			exp.taskCursorDataSource()(0, 50).mapPerform("performGets", ["sourceId", "name", "notes", "completed", "assigneeStatus", "dueOn", "sourceItemIds", "sourceAssigneeId", "sourceFollowerIds"]).should.deep.equal([]);
+		});
+
+		it("should paginate cursor correctly", function() {
+			lines = [
+				{ __object_id: 1, __type: "Task", name: "task1", schedule_status: "UPCOMING", description: "", attachments: [], items: [], stories: [], followers_du: [] },
+				{ __object_id: 2, __type: "Task", name: "task2", schedule_status: "UPCOMING", description: "", attachments: [], items: [], stories: [], followers_du: [] }
+			]
+			exp.prepareForImport();
+			exp.taskCursorDataSource()(0, 1).length.should.equal(1);
+			exp.taskCursorDataSource()(1, 1).length.should.equal(1);
+			exp.taskCursorDataSource()(2, 1).length.should.equal(0);
+		});
 	});
 
 	describe("#storyCursorDataSource()", function() {
@@ -192,23 +211,13 @@ describe("AsanaExport", function() {
 			]);
 		});
 
-		it("should not return trashed Tasks", function() {
+		it("should not include AddAttachmentStory", function() {
 			lines = [
-				{ __object_id: 1, __type: "Task", __trashed_at: "2023-11-30 00:00:00", name: "task1", schedule_status: "UPCOMING", due_date:"2023-11-30 00:00:00", description: "description", attachments: [], items: [], stories: [], followers_du: [] },
+				{ __object_id: 1, __type: "Task", name: "task1", schedule_status: "UPCOMING", due_date:"2023-11-30 00:00:00", description: "description", attachments: [], items: [], stories: [2], followers_du: [] },
+				{ __object_id: 2, __type: "AddAttachmentStory", creator_du: null, __creation_time: "2014-11-17 22:44:22", text: "removed the description" }
 			]
 			exp.prepareForImport();
-			exp.taskCursorDataSource()(0, 50).mapPerform("performGets", ["sourceId", "name", "notes", "completed", "assigneeStatus", "dueOn", "sourceItemIds", "sourceAssigneeId", "sourceFollowerIds"]).should.deep.equal([]);
-		});
-
-		it("should paginate cursor correctly", function() {
-			lines = [
-				{ __object_id: 1, __type: "Task", name: "task1", schedule_status: "UPCOMING", description: "", attachments: [], items: [], stories: [], followers_du: [] },
-				{ __object_id: 2, __type: "Task", name: "task2", schedule_status: "UPCOMING", description: "", attachments: [], items: [], stories: [], followers_du: [] },
-			]
-			exp.prepareForImport();
-			exp.taskCursorDataSource()(0, 1).length.should.equal(1);
-			exp.taskCursorDataSource()(1, 1).length.should.equal(1);
-			exp.taskCursorDataSource()(2, 1).length.should.equal(0);
+			exp.storyCursorDataSource()(0, 50).length.should.equal(0);
 		});
 	});
 
