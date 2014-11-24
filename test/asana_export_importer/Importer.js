@@ -219,10 +219,12 @@ describe("Importer", function() {
 
 			client.tasks.setParent.callCount.should.equal(4);
 
-			client.tasks.setParent.getCall(0).args.should.deep.equal([app.sourceToAsanaMap().at(201), { parent: app.sourceToAsanaMap().at(100) }])
-			client.tasks.setParent.getCall(1).args.should.deep.equal([app.sourceToAsanaMap().at(202), { parent: app.sourceToAsanaMap().at(100) }])
-			client.tasks.setParent.getCall(2).args.should.deep.equal([app.sourceToAsanaMap().at(203), { parent: app.sourceToAsanaMap().at(101) }])
-			client.tasks.setParent.getCall(3).args.should.deep.equal([app.sourceToAsanaMap().at(200), { parent: app.sourceToAsanaMap().at(101) }])
+			// reversed to get correct order
+			client.tasks.setParent.getCall(1).args.should.deep.equal([app.sourceToAsanaMap().at(201), { parent: app.sourceToAsanaMap().at(100) }])
+			client.tasks.setParent.getCall(0).args.should.deep.equal([app.sourceToAsanaMap().at(202), { parent: app.sourceToAsanaMap().at(100) }])
+			// reversed to get correct order
+			client.tasks.setParent.getCall(3).args.should.deep.equal([app.sourceToAsanaMap().at(203), { parent: app.sourceToAsanaMap().at(101) }])
+			client.tasks.setParent.getCall(2).args.should.deep.equal([app.sourceToAsanaMap().at(200), { parent: app.sourceToAsanaMap().at(101) }])
 		});
 	});
 
@@ -245,8 +247,9 @@ describe("Importer", function() {
 			importer._addTasksToProjects();
 
 			client.tasks.addProject.should.have.been.called;
-			client.tasks.addProject.getCall(0).args.should.deep.equal([app.sourceToAsanaMap().at(300), { project: app.sourceToAsanaMap().at(200) }]);
-			client.tasks.addProject.getCall(1).args.should.deep.equal([app.sourceToAsanaMap().at(301), { project: app.sourceToAsanaMap().at(200) }]);
+			// reversed to get correct order
+			client.tasks.addProject.getCall(1).args.should.deep.equal([app.sourceToAsanaMap().at(300), { project: app.sourceToAsanaMap().at(200) }]);
+			client.tasks.addProject.getCall(0).args.should.deep.equal([app.sourceToAsanaMap().at(301), { project: app.sourceToAsanaMap().at(200) }]);
 		});
 	});
 

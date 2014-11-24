@@ -219,14 +219,14 @@ describe("Importer", function() {
 			exp.prepareForImport();
 
 			expect(exp.taskCursorDataSource()(0,50).mapPerform("toJS")).to.deep.equal([
-				{ sourceId: 100, name: "task1", notes: null, completed: false, dueOn: null, assigneeStatus: null, sourceAssigneeId: null, sourceItemIds: [], sourceFollowerIds: [], stories: [] },
+				{ sourceId: 100, name: "task1", notes: "", completed: false, dueOn: null, assigneeStatus: null, sourceAssigneeId: null, sourceItemIds: [], sourceFollowerIds: [], stories: [] },
 				{ sourceId: 101, name: "task2", notes: "desc", completed: true, dueOn: "2023-11-30 00:00:00", assigneeStatus: "upcoming", sourceAssigneeId: null, sourceItemIds: [], sourceFollowerIds: [], stories: [] }
 			]);
 
 			importer._importTasks();
 
 			expect(client.tasks.create).to.have.callCount(2);
-			expect(client.tasks.create).to.have.been.calledWithExactly({ workspace: orgId, name: "task1", notes: null, completed: false, due_on: null, assignee_status: null, hearted: false });
+			expect(client.tasks.create).to.have.been.calledWithExactly({ workspace: orgId, name: "task1", notes: "", completed: false, due_on: null, assignee_status: null, hearted: false });
 			expect(client.tasks.create).to.have.been.calledWithExactly({ workspace: orgId, name: "task2", notes: "desc", completed: true, due_on: "2023-11-30 00:00:00", assignee_status: "upcoming", hearted: false });
 		});
 
@@ -259,7 +259,7 @@ describe("Importer", function() {
 
 			expect(exp.taskCursorDataSource()(0,50).mapPerform("toJS")).to.deep.equal([
 				{
-					sourceId: 300, name: "task1", notes: null, completed: false, dueOn: null, assigneeStatus: null, sourceAssigneeId: null, sourceItemIds: [], sourceFollowerIds: [], stories: [
+					sourceId: 300, name: "task1", notes: "", completed: false, dueOn: null, assigneeStatus: null, sourceAssigneeId: null, sourceItemIds: [], sourceFollowerIds: [], stories: [
 						"user1 commented on Mon Nov 17 2014 22:44:22:\n\ncomment2",
 						"user1 commented on Mon Nov 17 2014 22:44:22:\n\ncomment1"
 					]
@@ -273,8 +273,11 @@ describe("Importer", function() {
 			expect(client.workspaces.addUser).to.have.callCount(1);
 			expect(client.tasks.create).to.have.callCount(1);
 			expect(client.stories.createOnTask).to.have.callCount(2);
-			expect(client.stories.createOnTask.getCall(0).args[1]).to.deep.equal({ text: "user1 commented on Mon Nov 17 2014 22:44:22:\n\ncomment2" });
-			expect(client.stories.createOnTask.getCall(1).args[1]).to.deep.equal({ text: "user1 commented on Mon Nov 17 2014 22:44:22:\n\ncomment1" });
+			// reversed to get correct order
+			expect(client.stories.createOnTask.getCall(1).args[0]).to.equal(app.sourceToAsanaMap().at(300));
+			expect(client.stories.createOnTask.getCall(1).args[1]).to.deep.equal({ text: "user1 commented on Mon Nov 17 2014 22:44:22:\n\ncomment2" });
+			expect(client.stories.createOnTask.getCall(0).args[0]).to.equal(app.sourceToAsanaMap().at(300));
+			expect(client.stories.createOnTask.getCall(0).args[1]).to.deep.equal({ text: "user1 commented on Mon Nov 17 2014 22:44:22:\n\ncomment1" });
 		});
 	});
 
@@ -317,9 +320,9 @@ describe("Importer", function() {
 			exp.prepareForImport();
 
 			expect(exp.taskCursorDataSource()(0,50).mapPerform("toJS")).to.deep.equal([
-				{ sourceId: 100, name: "task1",    notes: null, completed: false, dueOn: null, assigneeStatus: null, sourceAssigneeId: null, sourceItemIds: [202, 201], sourceFollowerIds: [], stories: [] },
-				{ sourceId: 201, name: "subtask2", notes: null, completed: false, dueOn: null, assigneeStatus: null, sourceAssigneeId: null, sourceItemIds: [],         sourceFollowerIds: [], stories: [] },
-				{ sourceId: 202, name: "subtask3", notes: null, completed: false, dueOn: null, assigneeStatus: null, sourceAssigneeId: null, sourceItemIds: [],         sourceFollowerIds: [], stories: [] }
+				{ sourceId: 100, name: "task1",    notes: "", completed: false, dueOn: null, assigneeStatus: null, sourceAssigneeId: null, sourceItemIds: [202, 201], sourceFollowerIds: [], stories: [] },
+				{ sourceId: 201, name: "subtask2", notes: "", completed: false, dueOn: null, assigneeStatus: null, sourceAssigneeId: null, sourceItemIds: [],         sourceFollowerIds: [], stories: [] },
+				{ sourceId: 202, name: "subtask3", notes: "", completed: false, dueOn: null, assigneeStatus: null, sourceAssigneeId: null, sourceItemIds: [],         sourceFollowerIds: [], stories: [] }
 			]);
 
 			importer._importTasks();
@@ -327,8 +330,9 @@ describe("Importer", function() {
 
 			expect(client.tasks.create).to.have.callCount(3);
 			expect(client.tasks.setParent).to.have.callCount(2);
-			expect(client.tasks.setParent.getCall(0).args).to.deep.equal([app.sourceToAsanaMap().at(202), { parent: app.sourceToAsanaMap().at(100) }])
-			expect(client.tasks.setParent.getCall(1).args).to.deep.equal([app.sourceToAsanaMap().at(201), { parent: app.sourceToAsanaMap().at(100) }])
+			// reversed to get correct order
+			expect(client.tasks.setParent.getCall(1).args).to.deep.equal([app.sourceToAsanaMap().at(202), { parent: app.sourceToAsanaMap().at(100) }])
+			expect(client.tasks.setParent.getCall(0).args).to.deep.equal([app.sourceToAsanaMap().at(201), { parent: app.sourceToAsanaMap().at(100) }])
 		});
 	});
 
@@ -352,8 +356,8 @@ describe("Importer", function() {
 				{ sourceId: 200, name: "project1", notes: "desc", sourceTeamId: 100, sourceMemberIds: [], sourceItemIds: [301, 300], archived: false, color: null }
 			]);
 			expect(exp.taskCursorDataSource()(0,50).mapPerform("toJS")).to.deep.equal([
-				{ sourceId: 300, name: "task1", notes: null, completed: false, dueOn: null, assigneeStatus: null, sourceAssigneeId: null, sourceItemIds: [], sourceFollowerIds: [], stories: [] },
-				{ sourceId: 301, name: "task2", notes: null, completed: false, dueOn: null, assigneeStatus: null, sourceAssigneeId: null, sourceItemIds: [], sourceFollowerIds: [], stories: [] }
+				{ sourceId: 300, name: "task1", notes: "", completed: false, dueOn: null, assigneeStatus: null, sourceAssigneeId: null, sourceItemIds: [], sourceFollowerIds: [], stories: [] },
+				{ sourceId: 301, name: "task2", notes: "", completed: false, dueOn: null, assigneeStatus: null, sourceAssigneeId: null, sourceItemIds: [], sourceFollowerIds: [], stories: [] }
 			]);
 
 			importer._importTeams();
@@ -365,8 +369,9 @@ describe("Importer", function() {
 			expect(client.projects.create).to.have.callCount(1);
 			expect(client.tasks.create).to.have.callCount(2);
 			expect(client.tasks.addProject).to.have.callCount(2);
-			expect(client.tasks.addProject.getCall(0).args).to.deep.equal([app.sourceToAsanaMap().at(301), { project: app.sourceToAsanaMap().at(200) }]);
-			expect(client.tasks.addProject.getCall(1).args).to.deep.equal([app.sourceToAsanaMap().at(300), { project: app.sourceToAsanaMap().at(200) }]);
+			// reversed to get correct order
+			expect(client.tasks.addProject.getCall(1).args).to.deep.equal([app.sourceToAsanaMap().at(301), { project: app.sourceToAsanaMap().at(200) }]);
+			expect(client.tasks.addProject.getCall(0).args).to.deep.equal([app.sourceToAsanaMap().at(300), { project: app.sourceToAsanaMap().at(200) }]);
 		});
 	});
 
@@ -386,8 +391,8 @@ describe("Importer", function() {
 				{ sourceId: 100, name: "tag1", sourceTeamId: null, sourceItemIds: [301, 300] }
 			]);
 			expect(exp.taskCursorDataSource()(0,50).mapPerform("toJS")).to.deep.equal([
-				{ sourceId: 300, name: "task1", notes: null, completed: false, dueOn: null, assigneeStatus: null, sourceAssigneeId: null, sourceItemIds: [], sourceFollowerIds: [], stories: [] },
-				{ sourceId: 301, name: "task2", notes: null, completed: false, dueOn: null, assigneeStatus: null, sourceAssigneeId: null, sourceItemIds: [], sourceFollowerIds: [], stories: [] }
+				{ sourceId: 300, name: "task1", notes: "", completed: false, dueOn: null, assigneeStatus: null, sourceAssigneeId: null, sourceItemIds: [], sourceFollowerIds: [], stories: [] },
+				{ sourceId: 301, name: "task2", notes: "", completed: false, dueOn: null, assigneeStatus: null, sourceAssigneeId: null, sourceItemIds: [], sourceFollowerIds: [], stories: [] }
 			]);
 
 			importer._importTags();
@@ -398,8 +403,9 @@ describe("Importer", function() {
 			expect(client.workspaces.tags).to.have.callCount(1);
 			expect(client.tasks.create).to.have.callCount(2);
 			expect(client.tasks.addTag).to.have.callCount(2);
-			expect(client.tasks.addTag.getCall(0).args).to.deep.equal([app.sourceToAsanaMap().at(301), { tag: app.sourceToAsanaMap().at(200) }]);
-			expect(client.tasks.addTag.getCall(1).args).to.deep.equal([app.sourceToAsanaMap().at(300), { tag: app.sourceToAsanaMap().at(200) }]);
+			// reversed to get correct order
+			expect(client.tasks.addTag.getCall(1).args).to.deep.equal([app.sourceToAsanaMap().at(301), { tag: app.sourceToAsanaMap().at(200) }]);
+			expect(client.tasks.addTag.getCall(0).args).to.deep.equal([app.sourceToAsanaMap().at(300), { tag: app.sourceToAsanaMap().at(200) }]);
 		});
 	});
 
@@ -444,8 +450,9 @@ describe("Importer", function() {
 			expect(client.workspaces.addUser).to.have.callCount(1);
 			expect(client.tasks.create).to.have.callCount(2);
 			expect(client.tasks.update).to.have.callCount(2);
-			expect(client.tasks.update.getCall(0).args).to.deep.equal([app.sourceToAsanaMap().at(401), { assignee: app.sourceToAsanaMap().at(100), opt_silent: true }]);
-			expect(client.tasks.update.getCall(1).args).to.deep.equal([app.sourceToAsanaMap().at(400), { assignee: app.sourceToAsanaMap().at(100), opt_silent: true }]);
+			// reversed to get correct order
+			expect(client.tasks.update.getCall(1).args).to.deep.equal([app.sourceToAsanaMap().at(401), { assignee: app.sourceToAsanaMap().at(100), opt_silent: true }]);
+			expect(client.tasks.update.getCall(0).args).to.deep.equal([app.sourceToAsanaMap().at(400), { assignee: app.sourceToAsanaMap().at(100), opt_silent: true }]);
 		});
 	});
 
@@ -466,7 +473,7 @@ describe("Importer", function() {
 			]);
 
 			expect(exp.taskCursorDataSource()(0,50).mapPerform("toJS")).to.deep.equal([
-				{ sourceId: 300, name: "task1", notes: null, completed: false, dueOn: null, assigneeStatus: null, sourceAssigneeId: null, sourceItemIds: [], sourceFollowerIds: [100, 101], stories: [] }
+				{ sourceId: 300, name: "task1", notes: "", completed: false, dueOn: null, assigneeStatus: null, sourceAssigneeId: null, sourceItemIds: [], sourceFollowerIds: [100, 101], stories: [] }
 			]);
 
 			importer._importTasks();
