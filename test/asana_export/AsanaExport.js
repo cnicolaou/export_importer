@@ -115,7 +115,7 @@ describe("AsanaExport", function() {
 			]
 			exp.prepareForImport();
 			exp.projects().mapPerform("performGets", ["sourceId", "archived", "name", "color", "notes", "sourceTeamId", "sourceMemberIds", "sourceItemIds"]).should.deep.equal([
-				{ sourceId: 5, archived: false, name: "project1", color: undefined, notes: "description", sourceTeamId: 4, sourceMemberIds: [1], sourceItemIds: [10,11,12] }
+				{ sourceId: 5, archived: false, name: "project1", color: null, notes: "description", sourceTeamId: 4, sourceMemberIds: [1], sourceItemIds: [10,11,12] }
 			]);
 		});
 	});
