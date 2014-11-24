@@ -134,6 +134,22 @@ describe("Importer", function() {
 			expect(client.projects.create).to.have.been.calledWithExactly({ workspace: orgId, name: "project2", notes: "desc", archived: false, public: false, color: null, team: app.sourceToAsanaMap().at(100) });
 			expect(client.projects.create).to.have.been.calledWithExactly({ workspace: orgId, name: "project3", notes: "desc", archived: false, public: false, color: null, team: app.sourceToAsanaMap().at(100) });
 		});
+
+		it("should not create projects for tags or ATMs", function() {
+			exp.addUserAndDomainUser(100, 200, "user1", "user1@example.com");
+			exp.addObject(400, "ItemList", { name: "tag1",     description: "desc", is_project: false, assignee: null, team: null, is_archived: false, items: [] });
+			exp.addObject(401, "ItemList", { name: "My Tasks", description: "desc", is_project: true,  assignee: 200, team: null, is_archived: false, items: [] });
+			exp.prepareForImport();
+
+			expect(exp.projects().mapPerform("toJS")).to.deep.equal([]);
+			expect(exp.tags().mapPerform("toJS")).to.deep.equal([
+				{ sourceId: 400, name: "tag1", sourceItemIds: [], sourceTeamId: null }
+			]);
+
+			importer._importProjects();
+
+			expect(client.projects.create).to.have.callCount(0);
+		});
 	});
 
 	describe("#_importTags()", function() {
@@ -142,7 +158,7 @@ describe("Importer", function() {
 			client.tags.createInWorkspace = sinon.spy(createMock);
 			client.workspaces.tags = sinon.stub().returns(Promise.resolve([]));
 
-			exp.addObject(100, "Team", { name: "team1", is_project: false, assignee: null, team: null, items: [] });
+			exp.addObject(100, "Team", { name: "team1", is_project: false, assignee: null, team_type: null, items: [] });
 			exp.addObject(200, "ItemList", { name: "tag1", is_project: false, assignee: null, team: null, items: [] });
 			exp.addObject(201, "ItemList", { name: "tag2", is_project: false, assignee: null, team: 100, items: [] });
 			exp.prepareForImport();
