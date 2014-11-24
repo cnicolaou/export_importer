@@ -185,29 +185,22 @@ describe("AsanaExport", function() {
 			exp.taskCursorDataSource()(1, 1).length.should.equal(1);
 			exp.taskCursorDataSource()(2, 1).length.should.equal(0);
 		});
-	});
 
-	describe("#storyCursorDataSource()", function() {
-		it("should return no stories", function() {
-			exp.prepareForImport();
-			exp.storyCursorDataSource()(0, 50).should.deep.equal([]);
-		});
-
-		it("should return two stories with reformatted texts", function() {
+		it("should return task with two stories with reformatted texts", function() {
 			lines = [
 				{ __object_id: 1, __type: "User", name: "mike" },
 				{ __object_id: 2, __type: "VerifiedEmail", ve_user: 1, ve_email: "mike@example.com" },
 				{ __object_id: 3, __type: "DomainUser", user: 1 },
-				{ __object_id: 4, __type: "Task", name: "task1", schedule_status: "UPCOMING", due_date:"2023-11-30 00:00:00", description: "description", attachments: [2], items: [], stories: [5, 6, 7], followers_du: [] },
+				{ __object_id: 4, __type: "Task", name: "task1", schedule_status: "UPCOMING", due_date:"2023-11-30 00:00:00", description: "description", attachments: [2], items: [], stories: [5, 7, 6], followers_du: [] },
 				{ __object_id: 5, __type: "Comment", creator_du: 3, __creation_time: "2014-11-17 22:44:22", text: "MY COMMENT" },
 				{ __object_id: 6, __type: "TaskNameChangedStory", creator_du: 3, __creation_time: "2014-11-17 22:44:22", text: "changed the name to \"task1\"" },
 				{ __object_id: 7, __type: "TaskDescriptionChangedStory", creator_du: 3, __creation_time: "2014-11-17 22:44:22", text: "removed the description" }
 			]
 			exp.prepareForImport();
-			exp.storyCursorDataSource()(0, 50).mapPerform("performGets", ["sourceId", "text", "sourceParentId"]).should.deep.equal([
-				{ sourceId: 5, text: "mike commented on Mon Nov 17 2014 22:44:22:\n\nMY COMMENT", sourceParentId: 4 },
-				{ sourceId: 6, text: "mike changed the name to \"task1\"", sourceParentId: 4 },
-				{ sourceId: 7, sourceParentId: 4, text: "mike removed the description" }
+			exp.taskCursorDataSource()(0, 50)[0].stories().should.deep.equal([
+				"mike commented on Mon Nov 17 2014 22:44:22:\n\nMY COMMENT",
+				"mike removed the description",
+				"mike changed the name to \"task1\""
 			]);
 		});
 
@@ -217,7 +210,7 @@ describe("AsanaExport", function() {
 				{ __object_id: 2, __type: "AddAttachmentStory", creator_du: null, __creation_time: "2014-11-17 22:44:22", text: "removed the description" }
 			]
 			exp.prepareForImport();
-			exp.storyCursorDataSource()(0, 50).length.should.equal(0);
+			exp.taskCursorDataSource()(0, 50)[0].stories().length.should.equal(0);
 		});
 	});
 

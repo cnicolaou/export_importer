@@ -166,8 +166,7 @@ describe("Importer", function() {
 	describe("#_importStories", function() {
 		it("should add a story to the correct task", function() {
 			exp.setMockData({
-				tasks: [{ sourceId: 100, name: "task foo", sourceFollowerIds: [] }],
-				stories: [{ sourceId: 101, text: "story text", sourceParentId: 100 }]
+				tasks: [{ sourceId: 100, name: "task foo", sourceFollowerIds: [], stories: ["story text"] }]
 			});
 
 			importer._importTasks();
