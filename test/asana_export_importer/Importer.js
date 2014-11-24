@@ -48,10 +48,6 @@ describe("Importer", function() {
 			client.tags.createInWorkspace.should.not.have.been.called;
 			client.stories.createOnTask.should.not.have.been.called;
 			client.workspaces.addUser.should.not.have.been.called;
-			importer._teams.should.have.length(0);
-			importer._projects.should.have.length(0);
-			importer._tags.should.have.length(0);
-			importer._users.should.have.length(0);
 		});
 	});
 
@@ -67,7 +63,6 @@ describe("Importer", function() {
 			importer._importTeams();
 
 			client.teams.create.should.have.been.calledTwice;
-			importer._teams.should.have.length(2);
 		});
 	});
 
@@ -82,7 +77,6 @@ describe("Importer", function() {
 			importer._importProjects();
 
 			client.projects.create.should.not.have.been.called;
-			importer._projects.should.have.length(0);
 		});
 
 		it("should create a project with a corresponding team", function() {
@@ -108,7 +102,6 @@ describe("Importer", function() {
 
 			importer._importTags();
 
-			importer._tags.should.have.length(1);
 			client.tags.createInWorkspace.should.have.been.calledOnce;
 			client.tags.createInWorkspace.should.have.been.calledWithExactly(importer.organizationId(), { name: "tag1", team: null });
 		});
@@ -122,7 +115,6 @@ describe("Importer", function() {
 			importer._importTeams();
 			importer._importTags();
 
-			importer._tags.should.have.length(1);
 			client.tags.createInWorkspace.should.have.been.calledOnce;
 			client.tags.createInWorkspace.should.have.been.calledWithExactly(importer.organizationId(), {
 				name: "tag1",
@@ -140,7 +132,6 @@ describe("Importer", function() {
 
 			client.tags.create.should.not.have.been.called;
 			client.tags.createInWorkspace.should.not.have.been.called;
-			importer._tags.should.have.length(1);
 		});
 	});
 

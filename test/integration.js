@@ -41,11 +41,6 @@ describe("Importer", function() {
 			expect(exp.projects()).to.deep.equal([]);
 			expect(exp.taskCursorDataSource()(0,50)).to.deep.equal([]);
 			expect(exp.attachmentCursorDataSource()(0,50)).to.deep.equal([]);
-
-			expect(importer._teams).to.deep.equal([]);
-			expect(importer._projects).to.deep.equal([]);
-			expect(importer._tags).to.deep.equal([]);
-			expect(importer._users).to.deep.equal([]);
 		});
 	});
 
@@ -66,7 +61,6 @@ describe("Importer", function() {
 
 			importer._importTeams();
 
-			expect(importer._teams).to.have.length(3);
 			expect(client.teams.create).to.have.callCount(3);
 			expect(client.teams.create).to.have.been.calledWithExactly({ organization: orgId, name: "team1", team_type: "PUBLIC" });
 			expect(client.teams.create).to.have.been.calledWithExactly({ organization: orgId, name: "team2", team_type: "REQUEST_TO_JOIN" });
@@ -89,7 +83,6 @@ describe("Importer", function() {
 			importer._importTeams();
 			importer._importProjects();
 
-			expect(importer._projects).to.have.length(0);
 			expect(client.projects.create).to.have.callCount(0);
 		});
 
@@ -105,8 +98,6 @@ describe("Importer", function() {
 			importer._importTeams();
 			importer._importProjects();
 
-			expect(importer._teams).to.have.length(1);
-			expect(importer._projects).to.have.length(1);
 			expect(client.teams.create).to.have.callCount(1);
 			expect(client.projects.create).to.have.callCount(1);
 			expect(client.projects.create).to.have.been.calledWithExactly({ workspace: orgId, name: "project1", notes: "desc", archived: false, public: false, color: null, team: app.sourceToAsanaMap().at(100) });
@@ -128,7 +119,6 @@ describe("Importer", function() {
 			importer._importTeams();
 			importer._importProjects();
 
-			expect(importer._projects).to.have.length(3);
 			expect(client.projects.create).to.have.callCount(3);
 			expect(client.projects.create).to.have.been.calledWithExactly({ workspace: orgId, name: "project1", notes: "desc", archived: false, public: true, color: null, team: app.sourceToAsanaMap().at(100) });
 			expect(client.projects.create).to.have.been.calledWithExactly({ workspace: orgId, name: "project2", notes: "desc", archived: false, public: false, color: null, team: app.sourceToAsanaMap().at(100) });
@@ -171,8 +161,6 @@ describe("Importer", function() {
 			importer._importTeams();
 			importer._importTags();
 
-			expect(importer._teams).to.have.length(1);
-			expect(importer._tags).to.have.length(2);
 			expect(client.teams.create).to.have.callCount(1);
 			expect(client.tags.createInWorkspace).to.have.callCount(2);
 			expect(client.workspaces.tags).to.have.callCount(1);
@@ -197,8 +185,7 @@ describe("Importer", function() {
 
 			expect(client.tags.createInWorkspace).to.have.callCount(0);
 			expect(client.workspaces.tags).to.have.callCount(1);
-			expect(importer._tags).to.have.length(1);
-			expect(importer._tags.mapPerform("toJS")).to.deep.equal([{ workspaceId: orgId, sourceId: 100, asanaId: 1, name: "tag1", sourceTeamId: null, sourceItemIds: [] }]);
+			expect(app.sourceToAsanaMap().at(100)).to.equal(1);
 		});
 	});
 
