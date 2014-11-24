@@ -21,6 +21,8 @@ var AsanaExportInMemory = ae.AsanaExport.extend().setSlots({
 		this.db().create();
 		this._readLines({ readLine: function() { return JSON.stringify(self._lines.shift()); } });
 	},
+	cleanupAfterImport: function() {
+	},
 	addObject: function(id, type, object) {
 		object.__object_id = id;
 		object.__type = type;
