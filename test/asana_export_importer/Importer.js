@@ -1,10 +1,3 @@
-var chai = require("chai");
-var sinon = require("sinon");
-var sinonChai = require("sinon-chai");
-chai.should();
-chai.use(sinonChai);
-
-var aei = require("../../lib/asana_export_importer");
 
 describe("Importer", function() {
 	var app = aei.App.shared();
@@ -13,6 +6,8 @@ describe("Importer", function() {
 	var client = null;
 
 	beforeEach(function() {
+		sandbox = sinon.sandbox.create();
+
 		app.setSourceToAsanaMap(aei.SourceToAsanaMap.clone());
 
 		importer = aei.Importer.clone();
@@ -37,6 +32,10 @@ describe("Importer", function() {
 		sinon.spy(client.teams, "addUser");
 		sinon.spy(client.projects, "addMembers");
 		sinon.spy(client.workspaces, "addUser");
+	});
+	
+	afterEach(function() {
+		sandbox.restore();
 	});
 
 	describe("#run()", function() {
@@ -102,16 +101,33 @@ describe("Importer", function() {
 	});
 
 	describe("#_importTags()", function() {
-		it("should create a tag", function() {
+		it("should create a tag with name", function() {
 			exp.setMockData({
-				tags: [{ sourceId: 1, name: "tag foo", sourceTeamId: null }]
+				tags: [{ sourceId: 100, name: "tag1", sourceTeamId: null }]
 			});
 
 			importer._importTags();
 
-			client.tags.createInWorkspace.should.have.been.calledOnce;
-			client.projects.create.should.not.have.been.called;
 			importer._tags.should.have.length(1);
+			client.tags.createInWorkspace.should.have.been.calledOnce;
+			client.tags.createInWorkspace.should.have.been.calledWithExactly(importer.organizationId(), { name: "tag1", team: null });
+		});
+
+		it("should create a tag with name and team", function() {
+			exp.setMockData({
+				tags: [{ sourceId: 100, name: "tag1", sourceTeamId: 200 }],
+				teams: [{ sourceId: 200, name: "team1", teamType: "PUBLIC", sourceMemberIds: [] }]
+			});
+
+			importer._importTeams();
+			importer._importTags();
+
+			importer._tags.should.have.length(1);
+			client.tags.createInWorkspace.should.have.been.calledOnce;
+			client.tags.createInWorkspace.should.have.been.calledWithExactly(importer.organizationId(), {
+				name: "tag1",
+				team: app.sourceToAsanaMap().at(200)
+			});
 		});
 
 		it("should not create duplicate tags", function() {
@@ -143,8 +159,7 @@ describe("Importer", function() {
 	describe("#_importStories", function() {
 		it("should add a story to the correct task", function() {
 			exp.setMockData({
-				tasks: [{ sourceId: 100, name: "task foo", sourceFollowerIds: [] }],
-				stories: [{ sourceId: 101, text: "story text", sourceParentId: 100 }]
+				tasks: [{ sourceId: 100, name: "task foo", sourceFollowerIds: [], stories: ["story text"] }]
 			});
 
 			importer._importTasks();
@@ -156,7 +171,26 @@ describe("Importer", function() {
 	});
 
 	describe("#_importAttachments", function() {
-		it("", function() {
+		var fs = require("fs");
+
+		it("should write the attachment ids to a file", function() {
+			sandbox.stub(fs, "appendFile", function (path, text, callback) {
+				callback(null);
+			});
+
+			exp.setMockData({
+				tasks: [{ sourceId: 100, name: "task1", sourceFollowerIds: [], sourceItemIds: [] }],
+				attachments: [{ sourceId: 200, sourceParentId: 100 }]
+			});
+
+			app.setAttachmentsPath("attachments.json");
+
+			importer._importTasks();
+			importer._importAttachments();
+
+			fs.appendFile.getCall(0).args[0].should.equal("attachments.json");
+			fs.appendFile.getCall(0).args[1].should.match(/^\{[^\n]+\}\n$/);
+			JSON.parse(fs.appendFile.getCall(0).args[1]).should.deep.equal({ sourceId: 200, task: app.sourceToAsanaMap().at(100) });
 		});
 	});
 
@@ -164,24 +198,20 @@ describe("Importer", function() {
 		it("should add subtasks in the correct order", function() {
 			exp.setMockData({
 				tasks: [
-					{ sourceId: 100, name: "task1",    sourceFollowerIds: [], sourceItemIds: [201, 202] },
-					{ sourceId: 101, name: "task2",    sourceFollowerIds: [], sourceItemIds: [203, 200] },
+					{ sourceId: 100, name: "task2",    sourceFollowerIds: [], sourceItemIds: [201, 200] },
 					{ sourceId: 200, name: "subtask1", sourceFollowerIds: [], sourceItemIds: [] },
-					{ sourceId: 201, name: "subtask2", sourceFollowerIds: [], sourceItemIds: [] },
-					{ sourceId: 202, name: "subtask3", sourceFollowerIds: [], sourceItemIds: [] },
-					{ sourceId: 203, name: "subtask4", sourceFollowerIds: [], sourceItemIds: [] }
+					{ sourceId: 201, name: "subtask2", sourceFollowerIds: [], sourceItemIds: [] }
 				]
 			});
 
 			importer._importTasks();
 			importer._addSubtasksToTasks();
 
-			client.tasks.setParent.callCount.should.equal(4);
+			client.tasks.setParent.callCount.should.equal(2);
 
-			client.tasks.setParent.getCall(0).args.should.deep.equal([app.sourceToAsanaMap().at(201), { parent: app.sourceToAsanaMap().at(100) }])
-			client.tasks.setParent.getCall(1).args.should.deep.equal([app.sourceToAsanaMap().at(202), { parent: app.sourceToAsanaMap().at(100) }])
-			client.tasks.setParent.getCall(2).args.should.deep.equal([app.sourceToAsanaMap().at(203), { parent: app.sourceToAsanaMap().at(101) }])
-			client.tasks.setParent.getCall(3).args.should.deep.equal([app.sourceToAsanaMap().at(200), { parent: app.sourceToAsanaMap().at(101) }])
+			// reversed to get correct order
+			client.tasks.setParent.getCall(1).args.should.deep.equal([app.sourceToAsanaMap().at(201), { parent: app.sourceToAsanaMap().at(100) }])
+			client.tasks.setParent.getCall(0).args.should.deep.equal([app.sourceToAsanaMap().at(200), { parent: app.sourceToAsanaMap().at(100) }])
 		});
 	});
 
@@ -204,8 +234,9 @@ describe("Importer", function() {
 			importer._addTasksToProjects();
 
 			client.tasks.addProject.should.have.been.called;
-			client.tasks.addProject.getCall(0).args.should.deep.equal([app.sourceToAsanaMap().at(300), { projectId: app.sourceToAsanaMap().at(200) }]);
-			client.tasks.addProject.getCall(1).args.should.deep.equal([app.sourceToAsanaMap().at(301), { projectId: app.sourceToAsanaMap().at(200) }]);
+			// reversed to get correct order
+			client.tasks.addProject.getCall(1).args.should.deep.equal([app.sourceToAsanaMap().at(300), { project: app.sourceToAsanaMap().at(200) }]);
+			client.tasks.addProject.getCall(0).args.should.deep.equal([app.sourceToAsanaMap().at(301), { project: app.sourceToAsanaMap().at(200) }]);
 		});
 	});
 
@@ -243,8 +274,8 @@ describe("Importer", function() {
 	describe("#_addAssigneesToTasks", function() {
 		it("should set the assignee of a task", function() {
 			exp.setMockData({
-				users: [{ sourceId: 100, name: "user1", email: "user1@example.com" }],
-				tasks: [{ sourceId: 101, name: "task1", sourceFollowerIds: [], sourceAssigneeId: 100 }]
+				users: [{ sourceId: 100, name: "user1", email: "user1@example.com", sourceItemIds: [101] }],
+				tasks: [{ sourceId: 101, name: "task1", sourceFollowerIds: [] }]
 			});
 
 			importer._importTasks();

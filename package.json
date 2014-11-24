@@ -18,7 +18,7 @@
   },
   "scripts": {
     "start": "node bin/asana_export_importer",
-    "test": "./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha -- --ui mocha-fibers --recursive -R spec"
+    "test": "./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha -- --ui mocha-fibers --recursive -R spec --require test/test_helper.js"
   },
   "bin": {
     "asana_export_importer": "./bin/asana_export_importer"
