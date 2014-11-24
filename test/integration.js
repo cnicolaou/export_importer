@@ -122,9 +122,12 @@ describe("Importer", function() {
 	});
 
 	describe("#_importProjects()", function() {
-		it("should not create a project without a team", function() {
+		beforeEach(function() {
 			client.projects.create = sinon.spy(createMock);
+			client.teams.create = sinon.spy(createMock);
+		});
 
+		it("should not create a project without a team", function() {
 			exp.addObject(200, "ItemList", { name: "project1", description: "desc", is_project: true, is_archived: false, team: null, items: [], assignee: null });
 			exp.prepareForImport();
 
@@ -138,15 +141,12 @@ describe("Importer", function() {
 		});
 
 		it("should create a project with a corresponding team", function() {
-			client.projects.create = sinon.spy(createMock);
-			client.teams.create = sinon.spy(createMock);
-
 			exp.addObject(100, "Team", { name: "team1", team_type: "PUBLIC" });
 			exp.addObject(200, "ItemList", { name: "project1", description: "desc", is_project: true, is_archived: false, team: 100, items: [], assignee: null });
 			exp.prepareForImport();
 
 			expect(exp.projects().mapPerform("toJS")).to.deep.equal([
-				{ sourceId: 200, name: "project1", notes: "desc", archived: false, color: null, sourceTeamId: 100, sourceItemIds: [], sourceMemberIds: [] }
+				{ sourceId: 200, name: "project1", notes: "desc", archived: false, public: false, color: null, sourceTeamId: 100, sourceItemIds: [], sourceMemberIds: [] }
 			]);
 
 			importer._importTeams();
@@ -156,7 +156,30 @@ describe("Importer", function() {
 			expect(importer._projects).to.have.length(1);
 			expect(client.teams.create).to.have.callCount(1);
 			expect(client.projects.create).to.have.callCount(1);
-			expect(client.projects.create).to.have.been.calledWithExactly({ workspace: orgId, name: "project1", notes: "desc", archived: false, color: null, team: app.sourceToAsanaMap().at(100) });
+			expect(client.projects.create).to.have.been.calledWithExactly({ workspace: orgId, name: "project1", notes: "desc", archived: false, public: false, color: null, team: app.sourceToAsanaMap().at(100) });
+		});
+
+		it("should create projects with correct 'public' fields (and defaults to false)", function() {
+			exp.addObject(100, "Team", { name: "team1", team_type: "PUBLIC" });
+			exp.addObject(200, "ItemList", { name: "project1", description: "desc", is_project: true, is_archived: false, team: 100, items: [], is_public_to_workspace: true });
+			exp.addObject(201, "ItemList", { name: "project2", description: "desc", is_project: true, is_archived: false, team: 100, items: [], is_public_to_workspace: false });
+			exp.addObject(202, "ItemList", { name: "project3", description: "desc", is_project: true, is_archived: false, team: 100, items: [] });
+			exp.prepareForImport();
+
+			expect(exp.projects().mapPerform("toJS")).to.deep.equal([
+				{ sourceId: 200, name: "project1", notes: "desc", archived: false, public: true, color: null, sourceTeamId: 100, sourceItemIds: [], sourceMemberIds: [] },
+				{ sourceId: 201, name: "project2", notes: "desc", archived: false, public: false, color: null, sourceTeamId: 100, sourceItemIds: [], sourceMemberIds: [] },
+				{ sourceId: 202, name: "project3", notes: "desc", archived: false, public: false, color: null, sourceTeamId: 100, sourceItemIds: [], sourceMemberIds: [] }
+			]);
+
+			importer._importTeams();
+			importer._importProjects();
+
+			expect(importer._projects).to.have.length(3);
+			expect(client.projects.create).to.have.callCount(3);
+			expect(client.projects.create).to.have.been.calledWithExactly({ workspace: orgId, name: "project1", notes: "desc", archived: false, public: true, color: null, team: app.sourceToAsanaMap().at(100) });
+			expect(client.projects.create).to.have.been.calledWithExactly({ workspace: orgId, name: "project2", notes: "desc", archived: false, public: false, color: null, team: app.sourceToAsanaMap().at(100) });
+			expect(client.projects.create).to.have.been.calledWithExactly({ workspace: orgId, name: "project3", notes: "desc", archived: false, public: false, color: null, team: app.sourceToAsanaMap().at(100) });
 		});
 	});
 
@@ -353,7 +376,7 @@ describe("Importer", function() {
 				{ sourceId: 100, name: "team1", teamType: "PUBLIC", sourceMemberIds: [] }
 			]);
 			expect(exp.projects().mapPerform("toJS")).to.deep.equal([
-				{ sourceId: 200, name: "project1", notes: "desc", sourceTeamId: 100, sourceMemberIds: [], sourceItemIds: [301, 300], archived: false, color: null }
+				{ sourceId: 200, name: "project1", notes: "desc", sourceTeamId: 100, sourceMemberIds: [], sourceItemIds: [301, 300], archived: false, color: null, public: false }
 			]);
 			expect(exp.taskCursorDataSource()(0,50).mapPerform("toJS")).to.deep.equal([
 				{ sourceId: 300, name: "task1", notes: "", completed: false, dueOn: null, assigneeStatus: null, sourceAssigneeId: null, sourceItemIds: [], sourceFollowerIds: [], stories: [] },
@@ -572,7 +595,7 @@ describe("Importer", function() {
 				{ sourceId: 101, name: "user2", email: "user2@example.com", sourceItemIds: [] }
 			]);
 			expect(exp.projects().mapPerform("toJS")).to.deep.equal([
-				{ sourceId: 400, name: "project1", notes: "desc", archived: false, color: null, sourceTeamId: 300, sourceItemIds: [], sourceMemberIds: [100, 101] }
+				{ sourceId: 400, name: "project1", notes: "desc", archived: false, public: false, color: null, sourceTeamId: 300, sourceItemIds: [], sourceMemberIds: [100, 101] }
 			]);
 
 			importer._importTeams();
