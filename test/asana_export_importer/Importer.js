@@ -117,7 +117,7 @@ describe("Importer", function() {
 
 			importer._tags.should.have.length(1);
 			client.tags.createInWorkspace.should.have.been.calledOnce;
-			client.tags.createInWorkspace.should.have.been.calledWithExactly(app.sourceToAsanaMap().at(100), { name: "tag1", team: null });
+			client.tags.createInWorkspace.should.have.been.calledWithExactly(importer.organizationId(), { name: "tag1", team: null });
 		});
 
 		it("should create a tag with name and team", function() {
@@ -131,7 +131,7 @@ describe("Importer", function() {
 
 			importer._tags.should.have.length(1);
 			client.tags.createInWorkspace.should.have.been.calledOnce;
-			client.tags.createInWorkspace.should.have.been.calledWithExactly(app.sourceToAsanaMap().at(100), {
+			client.tags.createInWorkspace.should.have.been.calledWithExactly(importer.organizationId(), {
 				name: "tag1",
 				team: app.sourceToAsanaMap().at(200)
 			});

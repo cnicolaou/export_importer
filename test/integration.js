@@ -404,8 +404,8 @@ describe("Importer", function() {
 			expect(client.tasks.create).to.have.callCount(2);
 			expect(client.tasks.addTag).to.have.callCount(2);
 			// reversed to get correct order
-			expect(client.tasks.addTag.getCall(1).args).to.deep.equal([app.sourceToAsanaMap().at(301), { tag: app.sourceToAsanaMap().at(200) }]);
-			expect(client.tasks.addTag.getCall(0).args).to.deep.equal([app.sourceToAsanaMap().at(300), { tag: app.sourceToAsanaMap().at(200) }]);
+			expect(client.tasks.addTag.getCall(1).args).to.deep.equal([app.sourceToAsanaMap().at(301), { tag: app.sourceToAsanaMap().at(100) }]);
+			expect(client.tasks.addTag.getCall(0).args).to.deep.equal([app.sourceToAsanaMap().at(300), { tag: app.sourceToAsanaMap().at(100) }]);
 		});
 	});
 
