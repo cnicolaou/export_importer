@@ -1,11 +1,3 @@
-var chai = require("chai");
-var sinon = require("sinon");
-var sinonChai = require("sinon-chai");
-chai.should();
-chai.use(sinonChai);
-
-var ae = require("../../lib/asana_export");
-var sqlite3 = require("sqlite3");
 
 describe("AsanaExport", function() {
 	var exp, lines;

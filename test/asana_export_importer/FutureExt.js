@@ -1,18 +1,3 @@
-var chai = require("chai");
-var sinon = require("sinon");
-var sinonChai = require("sinon-chai");
-chai.should();
-chai.use(sinonChai);
-
-var aei = require("../../lib/asana_export_importer");
-
-function sleep(ms) {
-    aei.Future.wrap(function(cb) {
-        setTimeout(function() {
-            cb();
-        }, ms);
-    })().wait();
-}
 
 describe("Array", function() {
 	describe("#forEachParallel", function() {

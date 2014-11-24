@@ -1,10 +1,3 @@
-var chai = require("chai");
-var sinon = require("sinon");
-var sinonChai = require("sinon-chai");
-chai.should();
-chai.use(sinonChai);
-
-var aei = require("../../lib/asana_export_importer");
 
 describe("Importer", function() {
 	var app = aei.App.shared();
@@ -205,26 +198,20 @@ describe("Importer", function() {
 		it("should add subtasks in the correct order", function() {
 			exp.setMockData({
 				tasks: [
-					{ sourceId: 100, name: "task1",    sourceFollowerIds: [], sourceItemIds: [201, 202] },
-					{ sourceId: 101, name: "task2",    sourceFollowerIds: [], sourceItemIds: [203, 200] },
+					{ sourceId: 100, name: "task2",    sourceFollowerIds: [], sourceItemIds: [201, 200] },
 					{ sourceId: 200, name: "subtask1", sourceFollowerIds: [], sourceItemIds: [] },
-					{ sourceId: 201, name: "subtask2", sourceFollowerIds: [], sourceItemIds: [] },
-					{ sourceId: 202, name: "subtask3", sourceFollowerIds: [], sourceItemIds: [] },
-					{ sourceId: 203, name: "subtask4", sourceFollowerIds: [], sourceItemIds: [] }
+					{ sourceId: 201, name: "subtask2", sourceFollowerIds: [], sourceItemIds: [] }
 				]
 			});
 
 			importer._importTasks();
 			importer._addSubtasksToTasks();
 
-			client.tasks.setParent.callCount.should.equal(4);
+			client.tasks.setParent.callCount.should.equal(2);
 
 			// reversed to get correct order
 			client.tasks.setParent.getCall(1).args.should.deep.equal([app.sourceToAsanaMap().at(201), { parent: app.sourceToAsanaMap().at(100) }])
-			client.tasks.setParent.getCall(0).args.should.deep.equal([app.sourceToAsanaMap().at(202), { parent: app.sourceToAsanaMap().at(100) }])
-			// reversed to get correct order
-			client.tasks.setParent.getCall(3).args.should.deep.equal([app.sourceToAsanaMap().at(203), { parent: app.sourceToAsanaMap().at(101) }])
-			client.tasks.setParent.getCall(2).args.should.deep.equal([app.sourceToAsanaMap().at(200), { parent: app.sourceToAsanaMap().at(101) }])
+			client.tasks.setParent.getCall(0).args.should.deep.equal([app.sourceToAsanaMap().at(200), { parent: app.sourceToAsanaMap().at(100) }])
 		});
 	});
 
