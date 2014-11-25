@@ -428,6 +428,21 @@ describe("Importer", function() {
 
 			expect(client.workspaces.addUser).to.have.callCount(0);
 		});
+
+		it("should not return deactivated DomainUsers", function() {
+			client.workspaces.addUser = sinon.spy(createMock);
+
+			exp.addObject(100, "User", { name: "user1", deactivated: false });
+			exp.addObject(200, "VerifiedEmail", { ve_user: 100, ve_email: "user1@example.com" });
+			exp.addObject(300, "DomainUser", { user: 100, task_list: null, deactivated: true });
+			exp.prepareForImport();
+
+			expect(exp.users().mapPerform("toJS")).to.deep.equal([]);
+
+			importer._importUsers();
+
+			expect(client.workspaces.addUser).to.have.callCount(0);
+		});
 	});
 
 	describe("#_addAssigneesToTasks", function() {
