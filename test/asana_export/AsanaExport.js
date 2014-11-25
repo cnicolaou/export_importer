@@ -125,11 +125,11 @@ describe("AsanaExport", function() {
 		});
 	});
 
-	describe("#taskCursorDataSource()", function() {
+	describe("#taskDataSource()", function() {
 		it("should return no tasks", function() {
 			exp.prepareForImport();
 
-			exp.taskCursorDataSource()(0, 50).should.deep.equal([]);
+			exp.taskDataSource()(0, 50).should.deep.equal([]);
 		});
 
 		it("should return one task and subtask with assignee and follower", function() {
@@ -143,7 +143,7 @@ describe("AsanaExport", function() {
 			exp.addObject(8, "Task", { name: "subtask1", schedule_status: "UPCOMING", due_date:"2023-11-30 00:00:00", description: "description", assignee: 3, attachments: [], items: [], stories: [], followers_du: [3] });
 			exp.prepareForImport();
 
-			exp.taskCursorDataSource()(0, 50).mapPerform("performGets", ["sourceId", "name", "notes", "completed", "assigneeStatus", "dueOn", "sourceItemIds", "sourceAssigneeId", "sourceFollowerIds"]).should.deep.equal([
+			exp.taskDataSource()(0, 50).mapPerform("performGets", ["sourceId", "name", "notes", "completed", "assigneeStatus", "dueOn", "sourceItemIds", "sourceAssigneeId", "sourceFollowerIds"]).should.deep.equal([
 				{ sourceId: 7, name: "task1",    notes: "description", completed: false, dueOn: "2023-11-30 00:00:00", assigneeStatus: "upcoming", sourceItemIds: [8], sourceAssigneeId: 1, sourceFollowerIds: [1] },
 				{ sourceId: 8, name: "subtask1", notes: "description", completed: false, dueOn: "2023-11-30 00:00:00", assigneeStatus: "upcoming", sourceItemIds: [],  sourceAssigneeId: 1, sourceFollowerIds: [1] }
 			]);
@@ -153,7 +153,7 @@ describe("AsanaExport", function() {
 			exp.addObject(1, "Task", { __trashed_at: "2023-11-30 00:00:00", name: "task1", schedule_status: "UPCOMING", due_date:"2023-11-30 00:00:00", description: "description", attachments: [], items: [], stories: [], followers_du: [] });
 			exp.prepareForImport();
 
-			exp.taskCursorDataSource()(0, 50).mapPerform("performGets", ["sourceId", "name", "notes", "completed", "assigneeStatus", "dueOn", "sourceItemIds", "sourceAssigneeId", "sourceFollowerIds"]).should.deep.equal([]);
+			exp.taskDataSource()(0, 50).mapPerform("performGets", ["sourceId", "name", "notes", "completed", "assigneeStatus", "dueOn", "sourceItemIds", "sourceAssigneeId", "sourceFollowerIds"]).should.deep.equal([]);
 		});
 
 		it("should paginate cursor correctly", function() {
@@ -161,9 +161,9 @@ describe("AsanaExport", function() {
 			exp.addObject(2, "Task", { name: "task2", schedule_status: "UPCOMING", description: "", attachments: [], items: [], stories: [], followers_du: [] });
 			exp.prepareForImport();
 
-			exp.taskCursorDataSource()(0, 1).length.should.equal(1);
-			exp.taskCursorDataSource()(1, 1).length.should.equal(1);
-			exp.taskCursorDataSource()(2, 1).length.should.equal(0);
+			exp.taskDataSource()(0, 1).length.should.equal(1);
+			exp.taskDataSource()(1, 1).length.should.equal(1);
+			exp.taskDataSource()(2, 1).length.should.equal(0);
 		});
 
 		it("should return task with two stories with reformatted texts", function() {
@@ -176,7 +176,7 @@ describe("AsanaExport", function() {
 			exp.addObject(7, "TaskDescriptionChangedStory", { creator_du: 3, __creation_time: "2014-11-17 22:44:22", text: "removed the description" });
 			exp.prepareForImport();
 
-			exp.taskCursorDataSource()(0, 50)[0].stories().should.deep.equal([
+			exp.taskDataSource()(0, 50)[0].stories().should.deep.equal([
 				"mike commented on Mon Nov 17 2014 22:44:22:\n\nMY COMMENT",
 				"mike removed the description",
 				"mike changed the name to \"task1\""
@@ -188,15 +188,15 @@ describe("AsanaExport", function() {
 			exp.addObject(2, "AddAttachmentStory", { creator_du: null, __creation_time: "2014-11-17 22:44:22", text: "removed the description" });
 			exp.prepareForImport();
 
-			exp.taskCursorDataSource()(0, 50)[0].stories().length.should.equal(0);
+			exp.taskDataSource()(0, 50)[0].stories().length.should.equal(0);
 		});
 	});
 
-	describe("#attachmentCursorDataSource()", function() {
+	describe("#attachmentDataSource()", function() {
 		it("should return no attachments", function() {
 			exp.prepareForImport();
 
-			exp.attachmentCursorDataSource()(0, 50).should.deep.equal([]);
+			exp.attachmentDataSource()(0, 50).should.deep.equal([]);
 		});
 
 		it("should return one attachment", function() {
@@ -204,7 +204,7 @@ describe("AsanaExport", function() {
 			exp.addObject(2, "Asset", { name: "asset1.png", download_url: "http://example.com/asset1.png" });
 			exp.prepareForImport();
 
-			exp.attachmentCursorDataSource()(0, 50).mapPerform("performGets", ["sourceId", "sourceParentId"]).should.deep.equal([
+			exp.attachmentDataSource()(0, 50).mapPerform("performGets", ["sourceId", "sourceParentId"]).should.deep.equal([
 				{ sourceId: 2, sourceParentId: 1 }
 			]);
 		});
