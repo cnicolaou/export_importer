@@ -7,6 +7,9 @@ global.sinon = require("sinon");
 var sinonChai = require("sinon-chai");
 chai.use(sinonChai);
 
+var chaiAsPromised = require("chai-as-promised");
+chai.use(chaiAsPromised);
+
 global.ae = require("../lib/asana_export");
 global.aei = require("../lib/asana_export_importer");
 global.sqlite3 = require("sqlite3");

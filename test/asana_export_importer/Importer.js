@@ -17,7 +17,7 @@ describe("Importer", function() {
 		importer.setExport(exp);
 
 		client = aei.AsanaClientMock.clone();
-		app.setApiClient(client);
+		app.setClient(client);
 
 		sinon.spy(client.teams, "create");
 		sinon.spy(client.teams, "addUser");

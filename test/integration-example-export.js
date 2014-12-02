@@ -23,7 +23,7 @@ describe("Importer", function() {
 		importer.setExport(exp);
 
 		client = { workspaces: {}, users: {}, teams: {}, projects: {}, tags: {}, tasks: {}, stories: {} };
-		app.setApiClient(client);
+		app.setClient(client);
 	});
 
 	describe("#run()", function() {
