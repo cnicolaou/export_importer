@@ -48,8 +48,12 @@ var app = aei.App.shared();
 app.importer().setExport(ExportImplementation.clone().setPath(path));
 app.importer().setOrganizationId(organization);
 
+app.sourceToAsanaMap().setDbPath("db/mapping.sqlite");
+app.clientCache().setDbPath("db/cache.sqlite");
+
+app.setResumable(true);
 app.setApiClient(aei.asana.Client.basicAuth(apiKey));
-// app.setApiClient(aei.MockApiClient.clone()); //TODO
+// app.setApiClient(aei.AsanaClientMock.clone());
 
 app.setAttachmentsPath(attachmentsPath);
 app.start().resolve(function(err){

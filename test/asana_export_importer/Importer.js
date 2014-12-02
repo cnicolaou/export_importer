@@ -16,21 +16,22 @@ describe("Importer", function() {
 		exp = aei.MockExport.clone();
 		importer.setExport(exp);
 
-		client = aei.MockApiClient.clone();
+		client = aei.AsanaClientMock.clone();
 		app.setApiClient(client);
 
-		["teams", "projects", "tags", "tasks", "stories", "users"].forEach(function(type) {
-			sinon.spy(client[type], "create");
-		});
+		sinon.spy(client.teams, "create");
+		sinon.spy(client.teams, "addUser");
+		sinon.spy(client.projects, "create");
+		sinon.spy(client.projects, "addMembers");
+		sinon.spy(client.tags, "create");
 		sinon.spy(client.tags, "createInWorkspace");
-		sinon.spy(client.stories, "createOnTask");
+		sinon.spy(client.tasks, "create");
 		sinon.spy(client.tasks, "setParent");
 		sinon.spy(client.tasks, "addTag");
 		sinon.spy(client.tasks, "addFollowers");
 		sinon.spy(client.tasks, "addProject");
 		sinon.spy(client.tasks, "update");
-		sinon.spy(client.teams, "addUser");
-		sinon.spy(client.projects, "addMembers");
+		sinon.spy(client.stories, "createOnTask");
 		sinon.spy(client.workspaces, "addUser");
 	});
 	
@@ -126,7 +127,7 @@ describe("Importer", function() {
 			exp.setMockData({
 				tags: [{ sourceId: 1, name: "tag foo", sourceTeamId: null }]
 			});
-			client.setExistingTags([ { name: "tag foo", id: 1 } ]);
+			sinon.stub(client.workspaces, "tags", function() { return Promise.resolve([ { name: "tag foo", id: 1 } ]); });
 
 			importer._importTags();
 
