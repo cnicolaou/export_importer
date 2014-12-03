@@ -17,9 +17,11 @@ doc =
 "  --attachments=<file>  Attachments file to write to [default: db/attachments.json]\n" +
 "  --databases=<dir>     Base directory for temporary databases [default: db]\n" +
 "  --resumable=<bool>    Enable resuming [default: true]\n" +
-"  --retries=<count>       Maximum number of times to retry (0 = no retry) [default: 5]\n" +
+"  --retries=<count>     Maximum number of times to retry (0 = no retry) [default: 5]\n" +
 "  --retry-delay=<ms>    Milliseconds to wait before retrying [default: 500]\n" +
 "  --retry-backoff=<n>   Backoff factor (total_delay = retry_delay * retry_backoff ^ attempt_number) [default: 2]\n" +
+"  --concurrency=<n>     Concurrent API requests [default: 1000]\n" +
+"  --batch-size=<n>      Export item fetch batch size [default: 100]\n" +
 "  -h --help             Show this screen.\n" + 
 "  --version             Show version."
 
@@ -36,7 +38,9 @@ exports.parseOptions = function() {
 		retries: parseInt(opts["--retries"], 10),
 		retryDelay: parseInt(opts["--retry-delay"], 10),
 		retryBackoff: parseInt(opts["--retry-backoff"], 10),
-		resumable: opts["--resumable"] === "true"
+		resumable: opts["--resumable"] === "true",
+		concurrency: parseInt(opts["--concurrency"], 10),
+		batchSize: parseInt(opts["--batch-size"], 10)
 	}
 }
 
@@ -59,19 +63,23 @@ exports.initApp = function(options) {
 
 	var app = aei.App.shared();
 
-	app.importer().setExport(ExportImplementation.clone().performSets({
-		path: options.path,
-		dbDirectory: options.databasesPath
-	}));
+	app.importer().setExport(ExportImplementation.clone());
 	app.importer().setOrganizationId(options.organization);
+	app.importer().setConcurrency(options.concurrency);
+
+	app.importer().export().setPath(options.path);
+	app.importer().export().setBatchSize(options.batchSize);
+	app.importer().export().setDbDirectory(options.databasesPath);
 
 	app.sourceToAsanaMap().setDbPath(options.databasesPath + "/mapping.sqlite");
 
+	app.setAttachmentsPath(options.attachmentsPath);
 	app.setClient(aei.asana.Client.basicAuth(options.apiKey));
 	// app.setClient(aei.AsanaClientMock.clone());
 
 	if (options.resumable) {
-		app.setClientCache(aei.AsanaClientCache.clone().setDbPath(options.databasesPath + "/cache.sqlite"));
+		app.setClientCache(aei.AsanaClientCache.clone());
+		app.clientCache().setDbPath(options.databasesPath + "/cache.sqlite")
 	}
 
 	if (options.retries > 0) {
@@ -80,8 +88,6 @@ exports.initApp = function(options) {
 		app.clientRetry().setBackoff(options.retryBackoff);
 		app.clientRetry().setDelay(options.retryDelay);
 	}
-
-	app.setAttachmentsPath(options.attachmentsPath);
 
 	return app;
 }
