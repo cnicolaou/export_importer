@@ -1,0 +1,21 @@
+#!/usr/bin/env node
+
+var docopt = require("docopt").docopt;
+
+var cli = require("./asana_export_importer");
+var repl = require("repl");
+var promisifyRepl = require("repl-promised").promisify;
+
+// hack to make path optional
+cli.doc = cli.doc.replace(" <path>", " [<path>]");
+
+global.ae = require("../lib/asana_export");
+global.aei = require("../lib/asana_export_importer");
+
+global.app = cli.initApp(cli.parseOptions());
+global.asana = global.app.client();
+
+promisifyRepl(repl.start({
+	prompt: "asana> ",
+	useGlobal: true
+}));

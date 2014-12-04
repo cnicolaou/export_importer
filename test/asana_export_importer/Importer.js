@@ -1,19 +1,13 @@
 
 describe("Importer", function() {
-	var app = aei.App.shared();
-	var importer = null;
-	var exp = null;
-	var client = null;
+	var app, importer, exp, client;
 
 	beforeEach(function() {
 		sandbox = sinon.sandbox.create();
 
-		app.setSourceToAsanaMap(aei.SourceToAsanaMap.clone());
-
-		importer = aei.Importer.clone();
-		app.setImporter(importer);
-
+		app = createApp();
 		exp = aei.MockExport.clone();
+		importer = app.importer();
 		importer.setExport(exp);
 
 		client = aei.AsanaClientMock.clone();

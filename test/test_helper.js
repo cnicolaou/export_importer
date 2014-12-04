@@ -41,6 +41,14 @@ global.AsanaExportInMemory = ae.AsanaExport.extend().setSlots({
 	}
 });
 
+global.createApp = function() {
+	// var app = aei.App.shared();
+	// app.setSourceToAsanaMap(aei.SourceToAsanaMap.clone());
+	// app.setImporter(aei.Importer.clone());
+	var app = aei.App._shared = aei.App.clone();
+	return app;
+}
+
 global.sleep = function(ms) {
     aei.Future.wrap(function(cb) {
         setTimeout(function() {

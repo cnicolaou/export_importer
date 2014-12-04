@@ -29,6 +29,7 @@
     "istanbul": "^0.3.2",
     "mocha": "^2.0.1",
     "mocha-fibers": "^1.1.0",
+    "repl-promised": "^0.1.0",
     "sinon": "^1.11.1",
     "sinon-chai": "^2.6.0"
   }

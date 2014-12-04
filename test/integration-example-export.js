@@ -1,7 +1,7 @@
 
 describe("Importer", function() {
-	var app = aei.App.shared();
-	var importer, exp, client, orgId, asanaIdCounter;
+	var app, importer, exp, client;
+	var asanaIdCounter;
 
 	function createMock() { return Promise.resolve({ id: asanaIdCounter++ }); }
 	function emptyMock() { return Promise.resolve({}); }
@@ -10,20 +10,20 @@ describe("Importer", function() {
 		sandbox = sinon.sandbox.create();
 
 		asanaIdCounter = 1;
-		orgId = Math.round(Math.random()*1000000);
 
-		app.setSourceToAsanaMap(aei.SourceToAsanaMap.clone());
-
-		importer = aei.Importer.clone();
-		importer.setOrganizationId(orgId);
-		app.setImporter(importer);
-
+		app = createApp();
 		exp = ae.AsanaExport.clone();
 		exp.setPath("example/export.json");
+		importer = app.importer();
+		importer.setOrganizationId(1);
 		importer.setExport(exp);
 
 		client = { workspaces: {}, users: {}, teams: {}, projects: {}, tags: {}, tasks: {}, stories: {} };
 		app.setClient(client);
+	});
+
+	afterEach(function() {
+		sandbox.restore();
 	});
 
 	describe("#run()", function() {
@@ -39,6 +39,8 @@ describe("Importer", function() {
 			client.teams.create = sinon.spy(createMock);
 			client.workspaces.addUser = sinon.spy(emptyMock);
 			client.workspaces.tags = sinon.stub().returns(Promise.resolve([]));
+
+			sandbox.stub(require("fs"), "appendFile", function (path, text, callback) { callback(null); });
 
 			importer.run();
 
