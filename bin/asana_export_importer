@@ -3,11 +3,13 @@
 var aei = require("../lib/asana_export_importer");
 var docopt = require("docopt").docopt;
 
-doc =
+binName = require("path").basename(process.argv[1]);
+
+exports.doc =
 "Usage:\n"+
-"  asana_export_importer --api-key=<key> --organization=<id> [options] <path>\n" +
-"  asana_export_importer --help\n" +
-"  asana_export_importer --version\n" +
+"  " + binName + " --api-key=<key> --organization=<id> [options] <path>\n" +
+"  " + binName + " --help\n" +
+"  " + binName + " --version\n" +
 "\n" + 
 "Options:\n" + 
 "  --importer=<type>     Export source type [default: asana_export].\n" + 
@@ -26,7 +28,7 @@ doc =
 "  --version             Show version."
 
 exports.parseOptions = function() {
-	var opts = docopt(doc, { version: '0.0.1' });
+	var opts = docopt(exports.doc, { version: '0.0.1' });
 	return {
 		path: opts["<path>"],
 		module: opts["--importer"],
