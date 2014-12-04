@@ -16,21 +16,22 @@ describe("Importer", function() {
 		exp = aei.MockExport.clone();
 		importer.setExport(exp);
 
-		client = aei.MockApiClient.clone();
-		app.setApiClient(client);
+		client = aei.AsanaClientMock.clone();
+		app.setClient(client);
 
-		["teams", "projects", "tags", "tasks", "stories", "users"].forEach(function(type) {
-			sinon.spy(client[type], "create");
-		});
+		sinon.spy(client.teams, "create");
+		sinon.spy(client.teams, "addUser");
+		sinon.spy(client.projects, "create");
+		sinon.spy(client.projects, "addMembers");
+		sinon.spy(client.tags, "create");
 		sinon.spy(client.tags, "createInWorkspace");
-		sinon.spy(client.stories, "createOnTask");
+		sinon.spy(client.tasks, "create");
 		sinon.spy(client.tasks, "setParent");
 		sinon.spy(client.tasks, "addTag");
 		sinon.spy(client.tasks, "addFollowers");
 		sinon.spy(client.tasks, "addProject");
 		sinon.spy(client.tasks, "update");
-		sinon.spy(client.teams, "addUser");
-		sinon.spy(client.projects, "addMembers");
+		sinon.spy(client.stories, "createOnTask");
 		sinon.spy(client.workspaces, "addUser");
 	});
 	
@@ -48,10 +49,6 @@ describe("Importer", function() {
 			client.tags.createInWorkspace.should.not.have.been.called;
 			client.stories.createOnTask.should.not.have.been.called;
 			client.workspaces.addUser.should.not.have.been.called;
-			importer._teams.should.have.length(0);
-			importer._projects.should.have.length(0);
-			importer._tags.should.have.length(0);
-			importer._users.should.have.length(0);
 		});
 	});
 
@@ -67,7 +64,6 @@ describe("Importer", function() {
 			importer._importTeams();
 
 			client.teams.create.should.have.been.calledTwice;
-			importer._teams.should.have.length(2);
 		});
 	});
 
@@ -82,7 +78,6 @@ describe("Importer", function() {
 			importer._importProjects();
 
 			client.projects.create.should.not.have.been.called;
-			importer._projects.should.have.length(0);
 		});
 
 		it("should create a project with a corresponding team", function() {
@@ -108,7 +103,6 @@ describe("Importer", function() {
 
 			importer._importTags();
 
-			importer._tags.should.have.length(1);
 			client.tags.createInWorkspace.should.have.been.calledOnce;
 			client.tags.createInWorkspace.should.have.been.calledWithExactly(importer.organizationId(), { name: "tag1", team: null });
 		});
@@ -122,7 +116,6 @@ describe("Importer", function() {
 			importer._importTeams();
 			importer._importTags();
 
-			importer._tags.should.have.length(1);
 			client.tags.createInWorkspace.should.have.been.calledOnce;
 			client.tags.createInWorkspace.should.have.been.calledWithExactly(importer.organizationId(), {
 				name: "tag1",
@@ -134,13 +127,12 @@ describe("Importer", function() {
 			exp.setMockData({
 				tags: [{ sourceId: 1, name: "tag foo", sourceTeamId: null }]
 			});
-			client.setExistingTags([ { name: "tag foo", id: 1 } ]);
+			sinon.stub(client.workspaces, "tags", function() { return Promise.resolve([ { name: "tag foo", id: 1 } ]); });
 
 			importer._importTags();
 
 			client.tags.create.should.not.have.been.called;
 			client.tags.createInWorkspace.should.not.have.been.called;
-			importer._tags.should.have.length(1);
 		});
 	});
 

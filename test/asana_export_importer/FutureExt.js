@@ -1,47 +1,51 @@
 
 describe("Array", function() {
+	var order;
+	function mark(name) {
+		order.push(name + "(" + Array.prototype.slice.call(arguments, 1).join(",") + ")");
+	}
+	beforeEach(function() {
+		order = [];
+	});
+
 	describe("#forEachParallel", function() {
 		it("should process in parallel", function() {
-			var x = [];
-			[1,2].forEachParallel(function(i) {
-				x.push(100+i);
-				sleep(10);
-				x.push(200);
+			[20, 10].forEachParallel(function(delay, index) {
+				mark("start", index);
+				sleep(delay);
+				mark("end", index);
 			});
-			x.should.deep.equal([101, 102, 200, 200]);
+			expect(order).to.deep.equal(["start(0)", "start(1)", "end(1)", "end(0)"]);
 		});
 
 		it("should throw an error", function() {
-			function func() {
+			expect(function() {
 				[1].forEachParallel(function(i) {
 					throw "Some error";
 				});
-			}
-			func.should.throw("Some error");
+			}).to.throw("Some error");
 		});
 
 		it("should respect parallelism argument", function() {
-			var x = [];
-			[1,2,3,4].forEachParallel(function(i) {
-				x.push(100+i);
-				sleep(10);
-				x.push(200);
+			[10, 20, 30, 40].forEachParallel(function(delay, index) {
+				mark("start", index);
+				sleep(delay);
+				mark("end", index);
 			}, null, 2);
-			x.should.deep.equal([101, 102, 200, 200, 103, 104, 200, 200]);
+			expect(order).to.deep.equal(["start(0)", "start(1)", "end(0)", "start(2)", "end(1)", "start(3)", "end(2)", "end(3)"]);
 		});
 	});
 
 	describe("#mapParallel", function() {
 		it("should process in parallel", function() {
-			var x = [];
-			var y = [1,2].mapParallel(function(i) {
-				x.push(100 + i);
-				sleep(10);
-				x.push(200);
-				return 300 + i;
+			var result = [20, 10].mapParallel(function(delay, index) {
+				mark("start", index);
+				sleep(delay);
+				mark("end", index);
+				return index * 2;
 			});
-			x.should.deep.equal([101, 102, 200, 200]);
-			y.should.deep.equal([301, 302]);
+			expect(order).to.deep.equal(["start(0)", "start(1)", "end(1)", "end(0)"]);
+			expect(result).to.deep.equal([0, 2]);
 		});
 	});
 });

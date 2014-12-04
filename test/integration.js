@@ -23,7 +23,7 @@ describe("Importer", function() {
 		importer.setExport(exp);
 
 		client = { workspaces: {}, users: {}, teams: {}, projects: {}, tags: {}, tasks: {}, stories: {} };
-		app.setApiClient(client);
+		app.setClient(client);
 	});
 	
 	afterEach(function() {
@@ -39,13 +39,8 @@ describe("Importer", function() {
 			expect(exp.users()).to.deep.equal([]);
 			expect(exp.teams()).to.deep.equal([]);
 			expect(exp.projects()).to.deep.equal([]);
-			expect(exp.taskCursorDataSource()(0,50)).to.deep.equal([]);
-			expect(exp.attachmentCursorDataSource()(0,50)).to.deep.equal([]);
-
-			expect(importer._teams).to.deep.equal([]);
-			expect(importer._projects).to.deep.equal([]);
-			expect(importer._tags).to.deep.equal([]);
-			expect(importer._users).to.deep.equal([]);
+			expect(exp.taskDataSource()(0,50)).to.deep.equal([]);
+			expect(exp.attachmentDataSource()(0,50)).to.deep.equal([]);
 		});
 	});
 
@@ -66,7 +61,6 @@ describe("Importer", function() {
 
 			importer._importTeams();
 
-			expect(importer._teams).to.have.length(3);
 			expect(client.teams.create).to.have.callCount(3);
 			expect(client.teams.create).to.have.been.calledWithExactly({ organization: orgId, name: "team1", team_type: "PUBLIC" });
 			expect(client.teams.create).to.have.been.calledWithExactly({ organization: orgId, name: "team2", team_type: "REQUEST_TO_JOIN" });
@@ -89,7 +83,6 @@ describe("Importer", function() {
 			importer._importTeams();
 			importer._importProjects();
 
-			expect(importer._projects).to.have.length(0);
 			expect(client.projects.create).to.have.callCount(0);
 		});
 
@@ -105,8 +98,6 @@ describe("Importer", function() {
 			importer._importTeams();
 			importer._importProjects();
 
-			expect(importer._teams).to.have.length(1);
-			expect(importer._projects).to.have.length(1);
 			expect(client.teams.create).to.have.callCount(1);
 			expect(client.projects.create).to.have.callCount(1);
 			expect(client.projects.create).to.have.been.calledWithExactly({ workspace: orgId, name: "project1", notes: "desc", archived: false, public: false, color: null, team: app.sourceToAsanaMap().at(100) });
@@ -128,7 +119,6 @@ describe("Importer", function() {
 			importer._importTeams();
 			importer._importProjects();
 
-			expect(importer._projects).to.have.length(3);
 			expect(client.projects.create).to.have.callCount(3);
 			expect(client.projects.create).to.have.been.calledWithExactly({ workspace: orgId, name: "project1", notes: "desc", archived: false, public: true, color: null, team: app.sourceToAsanaMap().at(100) });
 			expect(client.projects.create).to.have.been.calledWithExactly({ workspace: orgId, name: "project2", notes: "desc", archived: false, public: false, color: null, team: app.sourceToAsanaMap().at(100) });
@@ -171,8 +161,6 @@ describe("Importer", function() {
 			importer._importTeams();
 			importer._importTags();
 
-			expect(importer._teams).to.have.length(1);
-			expect(importer._tags).to.have.length(2);
 			expect(client.teams.create).to.have.callCount(1);
 			expect(client.tags.createInWorkspace).to.have.callCount(2);
 			expect(client.workspaces.tags).to.have.callCount(1);
@@ -197,8 +185,7 @@ describe("Importer", function() {
 
 			expect(client.tags.createInWorkspace).to.have.callCount(0);
 			expect(client.workspaces.tags).to.have.callCount(1);
-			expect(importer._tags).to.have.length(1);
-			expect(importer._tags.mapPerform("toJS")).to.deep.equal([{ workspaceId: orgId, sourceId: 100, asanaId: 1, name: "tag1", sourceTeamId: null, sourceItemIds: [] }]);
+			expect(app.sourceToAsanaMap().at(100)).to.equal(1);
 		});
 	});
 
@@ -212,7 +199,7 @@ describe("Importer", function() {
 			exp.addObject(101, "Task", { name: "task2", description: "desc", completed: true, schedule_status: "UPCOMING", due_date:"2023-11-30 00:00:00", items: [], stories: [], attachments: [], followers_du: [] });
 			exp.prepareForImport();
 
-			expect(exp.taskCursorDataSource()(0,50).mapPerform("toJS")).to.deep.equal([
+			expect(exp.taskDataSource()(0,50).mapPerform("toJS")).to.deep.equal([
 				{ sourceId: 100, name: "task1", notes: "", completed: false, dueOn: null, public: false, assigneeStatus: null, sourceAssigneeId: null, sourceItemIds: [], sourceFollowerIds: [], stories: [] },
 				{ sourceId: 101, name: "task2", notes: "desc", completed: true, dueOn: "2023-11-30 00:00:00", public: false, assigneeStatus: "upcoming", sourceAssigneeId: null, sourceItemIds: [], sourceFollowerIds: [], stories: [] }
 			]);
@@ -228,7 +215,7 @@ describe("Importer", function() {
 			exp.addObject(100, "Task", { name: "task1", __trashed_at: "2023-11-30 00:00:00", items: [], stories: [], attachments: [], followers_du: [] });
 			exp.prepareForImport();
 
-			expect(exp.taskCursorDataSource()(0,50).mapPerform("toJS")).to.deep.equal([]);
+			expect(exp.taskDataSource()(0,50).mapPerform("toJS")).to.deep.equal([]);
 
 			importer._importTasks();
 
@@ -241,7 +228,7 @@ describe("Importer", function() {
 			exp.addObject(102, "Task", { name: "task3", items: [], stories: [], attachments: [], followers_du: [] });
 			exp.prepareForImport();
 
-			expect(exp.taskCursorDataSource()(0,50).mapPerform("toJS")).to.deep.equal([
+			expect(exp.taskDataSource()(0,50).mapPerform("toJS")).to.deep.equal([
 				{ sourceId: 100, name: "task1", notes: "", completed: false, dueOn: null, public: true, assigneeStatus: null, sourceAssigneeId: null, sourceItemIds: [], sourceFollowerIds: [], stories: [] },
 				{ sourceId: 101, name: "task2", notes: "", completed: false, dueOn: null, public: false, assigneeStatus: null, sourceAssigneeId: null, sourceItemIds: [], sourceFollowerIds: [], stories: [] },
 				{ sourceId: 102, name: "task3", notes: "", completed: false, dueOn: null, public: false, assigneeStatus: null, sourceAssigneeId: null, sourceItemIds: [], sourceFollowerIds: [], stories: [] }
@@ -269,7 +256,7 @@ describe("Importer", function() {
 			exp.addObject(402, "AddAttachmentStory", { creator_du: 200, __creation_time: "2014-11-17 22:44:22", text: "add attachment" });
 			exp.prepareForImport();
 
-			expect(exp.taskCursorDataSource()(0,50).mapPerform("toJS")).to.deep.equal([
+			expect(exp.taskDataSource()(0,50).mapPerform("toJS")).to.deep.equal([
 				{
 					sourceId: 300, name: "task1", notes: "", completed: false, dueOn: null, public: false, assigneeStatus: null, sourceAssigneeId: null, sourceItemIds: [], sourceFollowerIds: [], stories: [
 						"user1 commented on Mon Nov 17 2014 22:44:22:\n\ncomment2",
@@ -304,7 +291,7 @@ describe("Importer", function() {
 			exp.addObject(200, "Asset", { name: "asset1.png", download_url: "http://example.com/asset1.png" });
 			exp.prepareForImport();
 
-			expect(exp.attachmentCursorDataSource()(0,50).mapPerform("toJS")).to.deep.equal([
+			expect(exp.attachmentDataSource()(0,50).mapPerform("toJS")).to.deep.equal([
 				{ sourceId: 200, sourceParentId: 100 }
 			]);
 
@@ -331,7 +318,7 @@ describe("Importer", function() {
 			exp.addObject(202, "Task", { name: "subtask3", items: [],         attachments: [], followers_du: [], stories: [] });
 			exp.prepareForImport();
 
-			expect(exp.taskCursorDataSource()(0,50).mapPerform("toJS")).to.deep.equal([
+			expect(exp.taskDataSource()(0,50).mapPerform("toJS")).to.deep.equal([
 				{ sourceId: 100, name: "task1",    notes: "", completed: false, dueOn: null, public: false, assigneeStatus: null, sourceAssigneeId: null, sourceItemIds: [202, 201], sourceFollowerIds: [], stories: [] },
 				{ sourceId: 201, name: "subtask2", notes: "", completed: false, dueOn: null, public: false, assigneeStatus: null, sourceAssigneeId: null, sourceItemIds: [],         sourceFollowerIds: [], stories: [] },
 				{ sourceId: 202, name: "subtask3", notes: "", completed: false, dueOn: null, public: false, assigneeStatus: null, sourceAssigneeId: null, sourceItemIds: [],         sourceFollowerIds: [], stories: [] }
@@ -427,12 +414,27 @@ describe("Importer", function() {
 			expect(client.workspaces.addUser).to.have.been.calledWithExactly(importer.organizationId(), { user: "user1@example.com", opt_silent: true });
 		});
 
-		it("should not return deactivated users", function() {
+		it("should not return deactivated Users", function() {
 			client.workspaces.addUser = sinon.spy(createMock);
 
 			exp.addObject(100, "User", { name: "user1", deactivated: true });
 			exp.addObject(200, "VerifiedEmail", { ve_user: 100, ve_email: "user1@example.com" });
 			exp.addObject(300, "DomainUser", { user: 100, task_list: null });
+			exp.prepareForImport();
+
+			expect(exp.users().mapPerform("toJS")).to.deep.equal([]);
+
+			importer._importUsers();
+
+			expect(client.workspaces.addUser).to.have.callCount(0);
+		});
+
+		it("should not return active=false DomainUsers", function() {
+			client.workspaces.addUser = sinon.spy(createMock);
+
+			exp.addObject(100, "User", { name: "user1", deactivated: false });
+			exp.addObject(200, "VerifiedEmail", { ve_user: 100, ve_email: "user1@example.com" });
+			exp.addObject(300, "DomainUser", { user: 100, task_list: null, active: false });
 			exp.prepareForImport();
 
 			expect(exp.users().mapPerform("toJS")).to.deep.equal([]);
@@ -483,7 +485,7 @@ describe("Importer", function() {
 			exp.addObject(300, "Task", { name: "task1", description: null, items: [], attachments: [], followers_du: [200, 201], stories: [] });
 			exp.prepareForImport();
 
-			expect(exp.taskCursorDataSource()(0,50).mapPerform("toJS")).to.deep.equal([
+			expect(exp.taskDataSource()(0,50).mapPerform("toJS")).to.deep.equal([
 				{ sourceId: 300, name: "task1", notes: "", completed: false, dueOn: null, public: false, assigneeStatus: null, sourceAssigneeId: null, sourceItemIds: [], sourceFollowerIds: [100, 101], stories: [] }
 			]);
 
