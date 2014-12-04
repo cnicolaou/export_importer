@@ -24,12 +24,14 @@ exports.doc =
 "  --retry-backoff=<n>   Backoff factor (total_delay = retry_delay * retry_backoff ^ attempt_number) [default: 2]\n" +
 "  --concurrency=<n>     Concurrent API requests [default: 1000]\n" +
 "  --batch-size=<n>      Export item fetch batch size [default: 100]\n" +
-"  -d --dry-run          Run the import without making API calls\n" +
+"  --dry-run             Run the import without making API calls\n" +
+"  --simulate-latency=<n,m> Insert a delay when doing a dry run to simulate API call latency ('milliseconds[,standard_deviation]') [default: 0,0]"
 "  -h --help             Show this screen.\n" + 
 "  --version             Show version."
 
 exports.parseOptions = function() {
 	var opts = docopt(exports.doc, { version: '0.0.1' });
+	var latencyComponents = (opts["--simulate-latency"] || "").split(",");
 	return {
 		path: opts["<path>"],
 		module: opts["--importer"],
@@ -44,7 +46,9 @@ exports.parseOptions = function() {
 		resumable: opts["--resumable"] === "true",
 		concurrency: parseInt(opts["--concurrency"], 10),
 		batchSize: parseInt(opts["--batch-size"], 10),
-		dryRun: opts["--dry-run"]
+		dryRun: opts["--dry-run"],
+		latencyMean: parseFloat(latencyComponents[0] || "0"),
+		latencyStdev: parseFloat(latencyComponents[1] || "0"),
 	}
 }
 
@@ -85,6 +89,8 @@ exports.initApp = function(options) {
 
 	if (options.dryRun) {
 		app.setClient(aei.AsanaClientMock.clone());
+		app.client().setLatencyMean(options.latencyMean);
+		app.client().setLatencyStdev(options.latencyStdev);
 	} else {
 		app.setClient(aei.asana.Client.basicAuth(options.apiKey));
 	}
