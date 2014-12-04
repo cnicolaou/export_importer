@@ -252,7 +252,7 @@ describe("Importer", function() {
 			client.workspaces.addUser.should.have.been.calledOnce;
 			client.workspaces.addUser.should.have.been.calledWithExactly(importer.organizationId(), {
 				user: "mike@example.com",
-				opt_silent: true
+				silent: true
 			});
 		});
 	});
@@ -271,7 +271,7 @@ describe("Importer", function() {
 			client.tasks.update.should.have.been.calledOnce;
 			client.tasks.update.should.have.been.calledWithExactly(app.sourceToAsanaMap().at(101), {
 				assignee: app.sourceToAsanaMap().at(100),
-				opt_silent: true
+				silent: true
 			});
 		});
 	});
@@ -293,7 +293,7 @@ describe("Importer", function() {
 			client.tasks.addFollowers.should.have.been.calledOnce;
 			client.tasks.addFollowers.should.have.been.calledWithExactly(app.sourceToAsanaMap().at(200), {
 				followers: [100, 101].map(function(id) { return app.sourceToAsanaMap().at(id); }),
-				opt_silent: true
+				silent: true
 			});
 		});
 	});
@@ -315,7 +315,7 @@ describe("Importer", function() {
 			client.teams.addUser.should.have.been.calledTwice
 			client.teams.addUser.should.have.been.calledWithExactly(app.sourceToAsanaMap().at(200), {
 				user: app.sourceToAsanaMap().at(100),
-				opt_silent: true
+				silent: true
 			});
 		});
 	});
@@ -337,7 +337,7 @@ describe("Importer", function() {
 			client.projects.addMembers.should.have.been.calledOnce;
 			client.projects.addMembers.should.have.been.calledWithExactly(app.sourceToAsanaMap().at(200), {
 				members: [100, 101].map(function(id) { return app.sourceToAsanaMap().at(id); }),
-				opt_silent: true
+				silent: true
 			});
 		});
 	});

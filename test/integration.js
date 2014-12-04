@@ -406,7 +406,7 @@ describe("Importer", function() {
 			importer._importUsers();
 
 			expect(client.workspaces.addUser).to.have.callCount(1);
-			expect(client.workspaces.addUser).to.have.been.calledWithExactly(importer.organizationId(), { user: "user1@example.com", opt_silent: true });
+			expect(client.workspaces.addUser).to.have.been.calledWithExactly(importer.organizationId(), { user: "user1@example.com", silent: true });
 		});
 
 		it("should not return deactivated Users", function() {
@@ -464,8 +464,8 @@ describe("Importer", function() {
 			expect(client.tasks.create).to.have.callCount(2);
 			expect(client.tasks.update).to.have.callCount(2);
 			// reversed to get correct order
-			expect(client.tasks.update.getCall(1).args).to.deep.equal([app.sourceToAsanaMap().at(401), { assignee: app.sourceToAsanaMap().at(100), opt_silent: true }]);
-			expect(client.tasks.update.getCall(0).args).to.deep.equal([app.sourceToAsanaMap().at(400), { assignee: app.sourceToAsanaMap().at(100), opt_silent: true }]);
+			expect(client.tasks.update.getCall(1).args).to.deep.equal([app.sourceToAsanaMap().at(401), { assignee: app.sourceToAsanaMap().at(100), silent: true }]);
+			expect(client.tasks.update.getCall(0).args).to.deep.equal([app.sourceToAsanaMap().at(400), { assignee: app.sourceToAsanaMap().at(100), silent: true }]);
 		});
 	});
 
@@ -493,7 +493,7 @@ describe("Importer", function() {
 			expect(client.tasks.addFollowers).to.have.callCount(1);
 			expect(client.tasks.addFollowers).to.have.been.calledWithExactly(app.sourceToAsanaMap().at(300), {
 				followers: [100, 101].map(function(id) { return app.sourceToAsanaMap().at(id); }),
-				opt_silent: true
+				silent: true
 			});
 		});
 	});
@@ -524,11 +524,11 @@ describe("Importer", function() {
 			expect(client.teams.addUser).to.have.callCount(2);
 			expect(client.teams.addUser).to.have.been.calledWithExactly(app.sourceToAsanaMap().at(300), {
 				user: app.sourceToAsanaMap().at(100),
-				opt_silent: true
+				silent: true
 			});
 			expect(client.teams.addUser).to.have.been.calledWithExactly(app.sourceToAsanaMap().at(300), {
 				user: app.sourceToAsanaMap().at(101),
-				opt_silent: true
+				silent: true
 			});
 		});
 
@@ -587,7 +587,7 @@ describe("Importer", function() {
 			expect(client.projects.addMembers).to.have.callCount(1);
 			expect(client.projects.addMembers).to.have.been.calledWithExactly(app.sourceToAsanaMap().at(400), {
 				members: [100, 101].map(function(id) { return app.sourceToAsanaMap().at(id); }),
-				opt_silent: true
+				silent: true
 			});
 		});
 	});
