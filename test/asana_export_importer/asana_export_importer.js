@@ -29,6 +29,7 @@ describe("asana_export_importer", function() {
 			expect(options.resumable).to.equal(true);
 			expect(options.concurrency).to.equal(1000);
 			expect(options.batchSize).to.equal(100);
+			expect(options.dryRun).to.equal(false);
 		});
 
 		it("should parse all options correctly", function() {
@@ -45,6 +46,7 @@ describe("asana_export_importer", function() {
 				"--resumable=false",
 				"--concurrency=5555",
 				"--batch-size=6666",
+				"--dry-run",
 				"path"
 			];
 
@@ -63,6 +65,7 @@ describe("asana_export_importer", function() {
 			expect(options.resumable).to.equal(false);
 			expect(options.concurrency).to.equal(5555);
 			expect(options.batchSize).to.equal(6666);
+			expect(options.dryRun).to.equal(true);
 		});
 	});
 

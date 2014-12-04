@@ -24,6 +24,7 @@ exports.doc =
 "  --retry-backoff=<n>   Backoff factor (total_delay = retry_delay * retry_backoff ^ attempt_number) [default: 2]\n" +
 "  --concurrency=<n>     Concurrent API requests [default: 1000]\n" +
 "  --batch-size=<n>      Export item fetch batch size [default: 100]\n" +
+"  -d --dry-run          Run the import without making API calls\n" +
 "  -h --help             Show this screen.\n" + 
 "  --version             Show version."
 
@@ -42,7 +43,8 @@ exports.parseOptions = function() {
 		retryBackoff: parseInt(opts["--retry-backoff"], 10),
 		resumable: opts["--resumable"] === "true",
 		concurrency: parseInt(opts["--concurrency"], 10),
-		batchSize: parseInt(opts["--batch-size"], 10)
+		batchSize: parseInt(opts["--batch-size"], 10),
+		dryRun: opts["--dry-run"]
 	}
 }
 
@@ -68,20 +70,29 @@ exports.initApp = function(options) {
 	app.importer().setExport(ExportImplementation.clone());
 	app.importer().setOrganizationId(options.organization);
 	app.importer().setConcurrency(options.concurrency);
+	
+	require("http").globalAgent.maxSockets = options.concurrency;
+	require("https").globalAgent.maxSockets = options.concurrency;
 
 	app.importer().export().setPath(options.path);
 	app.importer().export().setBatchSize(options.batchSize);
 	app.importer().export().setDbDirectory(options.databasesPath);
 
 	app.sourceToAsanaMap().setDbPath(options.databasesPath + "/mapping.sqlite");
+	app.sourceToAsanaMap().setReadOnly(options.dryRun);
 
 	app.setAttachmentsPath(options.attachmentsPath);
-	app.setClient(aei.asana.Client.basicAuth(options.apiKey));
-	// app.setClient(aei.AsanaClientMock.clone());
+
+	if (options.dryRun) {
+		app.setClient(aei.AsanaClientMock.clone());
+	} else {
+		app.setClient(aei.asana.Client.basicAuth(options.apiKey));
+	}
 
 	if (options.resumable) {
 		app.setClientCache(aei.AsanaClientCache.clone());
-		app.clientCache().setDbPath(options.databasesPath + "/cache.sqlite")
+		app.clientCache().setDbPath(options.databasesPath + "/cache.sqlite");
+		app.clientCache().setReadOnly(options.dryRun);
 	}
 
 	if (options.retries > 0) {

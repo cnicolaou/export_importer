@@ -40,5 +40,22 @@ describe("BatchIterable", function() {
 
 			expect(order).to.deep.equal(["get(0,2)", "start(0)", "start(1)", "end(0)", "get(2,2)", "start(2)", "end(2)", "start(3)", "end(3)", "get(4,2)", "end(1)"]);
 		});
+
+		it("should ", function() {
+			data = [1,2,3,4,5,6];
+			iterable.setChunkSize(2);
+
+			iterable.forEachParallel(function(x, index) {
+				mark("start", x);
+				sleep(10 * index);
+				mark("end", x);
+			}, null, 4);
+
+			expect(order.filter(RegExp.prototype.test.bind(/start|end/))).to.deep.equal([
+				"start(1)", "start(2)", "start(3)", "start(4)",
+				"end(1)", "start(5)", "end(2)", "start(6)",
+				"end(3)", "end(4)", "end(5)", "end(6)"
+			]);
+		});
 	});
 });
