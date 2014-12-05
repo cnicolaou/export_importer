@@ -157,4 +157,5 @@
 {"__object_id":20123610973732,"__type":"User","__creation_time":"2014-11-13 19:56:24","name":"Asana Import Bot","is_claimed":true,"claimed_time":"2014-11-13 20:00:21","last_session_creation_time":1416266824123,"deactivated":false}
 {"__object_id":20124181134925,"__type":"VerifiedEmail","__creation_time":"2014-11-13 20:00:20","ve_user":20123610973732,"ve_email":"yachttom@gmail.com"}
 {"__object_id":20181476509144,"__type":"Team","__creation_time":"2014-11-14 05:49:01","name":"Team 1","team_type":"REQUEST_TO_JOIN"}
-{"__object_id":20181697220677,"__type":"Team","__creation_time":"2014-11-14 07:12:26","name":"Team 2","team_type":"REQUEST_TO_JOIN"}
+{"__object_id":20181697220677,"__type":"Team","__creation_time":"2014-11-14 07:12:26","name":"Team 2","team_type":"PUBLIC"}
+{"__object_id":20181697220677,"__type":"Team","__creation_time":"2014-11-14 08:12:26","name":"Team 3","team_type":"SECRET"}
