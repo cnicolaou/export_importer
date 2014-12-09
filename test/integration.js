@@ -57,9 +57,9 @@ describe("Integration", function() {
 			importer._importTeams();
 
 			expect(client.teams.create).to.have.callCount(3);
-			expect(client.teams.create).to.have.been.calledWithExactly({ organization: orgId, name: "team1", team_type: "PUBLIC" });
-			expect(client.teams.create).to.have.been.calledWithExactly({ organization: orgId, name: "team2", team_type: "REQUEST_TO_JOIN" });
-			expect(client.teams.create).to.have.been.calledWithExactly({ organization: orgId, name: "team3", team_type: "SECRET" });
+			expect(client.teams.create).to.have.been.calledWithExactly({ organization: orgId, name: "team1", type: "PUBLIC" });
+			expect(client.teams.create).to.have.been.calledWithExactly({ organization: orgId, name: "team2", type: "REQUEST_TO_JOIN" });
+			expect(client.teams.create).to.have.been.calledWithExactly({ organization: orgId, name: "team3", type: "SECRET" });
 		});
 	});
 
