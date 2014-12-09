@@ -1,5 +1,5 @@
 
-describe("Importer", function() {
+describe("Integration", function() {
 	var app, importer, exp, client;
 	var asanaIdCounter, orgId = 12345;
 
@@ -70,7 +70,7 @@ describe("Importer", function() {
 		});
 
 		it("should not create a project without a team", function() {
-			exp.addObject(200, "ItemList", { name: "project1", description: "desc", is_project: true, is_archived: false, team: null, items: [], assignee: null });
+			exp.addObject(200, "ItemList", { name: "project1", description: "desc", is_project: true, is_archived: false, team: null, items: [], assignee: null, followers_du: [] });
 			exp.prepareForImport();
 
 			expect(exp.projects().length).to.equal(0);
@@ -83,11 +83,11 @@ describe("Importer", function() {
 
 		it("should create a project with a corresponding team", function() {
 			exp.addObject(100, "Team", { name: "team1", team_type: "PUBLIC" });
-			exp.addObject(200, "ItemList", { name: "project1", description: "desc", is_project: true, is_archived: false, team: 100, items: [], assignee: null });
+			exp.addObject(200, "ItemList", { name: "project1", description: "desc", is_project: true, is_archived: false, team: 100, items: [], followers_du: [], assignee: null });
 			exp.prepareForImport();
 
 			expect(exp.projects().mapPerform("toJS")).to.deep.equal([
-				{ sourceId: 200, name: "project1", notes: "desc", archived: false, public: false, color: null, sourceTeamId: 100, sourceItemIds: [], sourceMemberIds: [] }
+				{ sourceId: 200, name: "project1", notes: "desc", archived: false, public: false, color: null, sourceTeamId: 100, sourceItemIds: [], sourceMemberIds: [], sourceFollowerIds: [] }
 			]);
 
 			importer._importTeams();
@@ -100,15 +100,15 @@ describe("Importer", function() {
 
 		it("should create projects with correct 'public' fields (and defaults to false)", function() {
 			exp.addObject(100, "Team", { name: "team1", team_type: "PUBLIC" });
-			exp.addObject(200, "ItemList", { name: "project1", description: "desc", is_project: true, is_archived: false, team: 100, items: [], is_public_to_workspace: true });
-			exp.addObject(201, "ItemList", { name: "project2", description: "desc", is_project: true, is_archived: false, team: 100, items: [], is_public_to_workspace: false });
-			exp.addObject(202, "ItemList", { name: "project3", description: "desc", is_project: true, is_archived: false, team: 100, items: [] });
+			exp.addObject(200, "ItemList", { name: "project1", description: "desc", is_project: true, is_archived: false, team: 100, items: [], followers_du: [], is_public_to_workspace: true });
+			exp.addObject(201, "ItemList", { name: "project2", description: "desc", is_project: true, is_archived: false, team: 100, items: [], followers_du: [], is_public_to_workspace: false });
+			exp.addObject(202, "ItemList", { name: "project3", description: "desc", is_project: true, is_archived: false, team: 100, items: [], followers_du: [] });
 			exp.prepareForImport();
 
 			expect(exp.projects().mapPerform("toJS")).to.deep.equal([
-				{ sourceId: 200, name: "project1", notes: "desc", archived: false, public: true, color: null, sourceTeamId: 100, sourceItemIds: [], sourceMemberIds: [] },
-				{ sourceId: 201, name: "project2", notes: "desc", archived: false, public: false, color: null, sourceTeamId: 100, sourceItemIds: [], sourceMemberIds: [] },
-				{ sourceId: 202, name: "project3", notes: "desc", archived: false, public: false, color: null, sourceTeamId: 100, sourceItemIds: [], sourceMemberIds: [] }
+				{ sourceId: 200, name: "project1", notes: "desc", archived: false, public: true, color: null, sourceTeamId: 100, sourceItemIds: [], sourceMemberIds: [], sourceFollowerIds: [] },
+				{ sourceId: 201, name: "project2", notes: "desc", archived: false, public: false, color: null, sourceTeamId: 100, sourceItemIds: [], sourceMemberIds: [], sourceFollowerIds: [] },
+				{ sourceId: 202, name: "project3", notes: "desc", archived: false, public: false, color: null, sourceTeamId: 100, sourceItemIds: [], sourceMemberIds: [], sourceFollowerIds: [] }
 			]);
 
 			importer._importTeams();
@@ -122,8 +122,8 @@ describe("Importer", function() {
 
 		it("should not create projects for tags or ATMs", function() {
 			exp.addUserAndDomainUser(100, 200, "user1", "user1@example.com");
-			exp.addObject(400, "ItemList", { name: "tag1",     description: "desc", is_project: false, assignee: null, team: null, is_archived: false, items: [] });
-			exp.addObject(401, "ItemList", { name: "My Tasks", description: "desc", is_project: true,  assignee: 200, team: null, is_archived: false, items: [] });
+			exp.addObject(400, "ItemList", { name: "tag1",     description: "desc", is_project: false, assignee: null, team: null, is_archived: false, items: [], followers_du: [] });
+			exp.addObject(401, "ItemList", { name: "My Tasks", description: "desc", is_project: true,  assignee: 200, team: null, is_archived: false, items: [], followers_du: [] });
 			exp.prepareForImport();
 
 			expect(exp.projects().mapPerform("toJS")).to.deep.equal([]);
@@ -143,9 +143,9 @@ describe("Importer", function() {
 			client.tags.createInWorkspace = sinon.spy(createMock);
 			client.workspaces.tags = sinon.stub().returns(Promise.resolve([]));
 
-			exp.addObject(100, "Team", { name: "team1", is_project: false, assignee: null, team_type: null, items: [] });
-			exp.addObject(200, "ItemList", { name: "tag1", is_project: false, assignee: null, team: null, items: [] });
-			exp.addObject(201, "ItemList", { name: "tag2", is_project: false, assignee: null, team: 100, items: [] });
+			exp.addObject(100, "Team", { name: "team1", is_project: false, assignee: null, team_type: null });
+			exp.addObject(200, "ItemList", { name: "tag1", is_project: false, assignee: null, team: null, items: [], followers_du: [] });
+			exp.addObject(201, "ItemList", { name: "tag2", is_project: false, assignee: null, team: 100, items: [], followers_du: [] });
 			exp.prepareForImport();
 
 			expect(exp.tags().mapPerform("toJS")).to.deep.equal([
@@ -169,7 +169,7 @@ describe("Importer", function() {
 				{ name: "tag1", id: 1 }
 			]));
 
-			exp.addObject(100, "ItemList", { name: "tag1", is_project: false, assignee: null, team: null, items: [] });
+			exp.addObject(100, "ItemList", { name: "tag1", is_project: false, assignee: null, team: null, items: [], followers_du: [] });
 			exp.prepareForImport();
 
 			expect(exp.tags().mapPerform("toJS")).to.deep.equal([
@@ -245,7 +245,7 @@ describe("Importer", function() {
 			client.stories.createOnTask = sinon.spy(createMock);
 
 			exp.addUserAndDomainUser(100, 200, "user1", "user1@example.com");
-			exp.addObject(300, "Task", { name: "task1", items: [], stories: [401, 400, 402], attachments: [], followers_du: [] });
+			exp.addObject(300, "Task", { name: "task1", items: [], stories: [400, 401, 402], attachments: [], followers_du: [] });
 			exp.addObject(400, "Comment", { creator_du: 200, __creation_time: "2014-11-17 22:44:22", text: "comment1" });
 			exp.addObject(401, "Comment", { creator_du: 200, __creation_time: "2014-11-17 22:44:22", text: "comment2" });
 			exp.addObject(402, "AddAttachmentStory", { creator_du: 200, __creation_time: "2014-11-17 22:44:22", text: "add attachment" });
@@ -254,9 +254,9 @@ describe("Importer", function() {
 			expect(exp.taskDataSource()(0,50).mapPerform("toJS")).to.deep.equal([
 				{
 					sourceId: 300, name: "task1", notes: "", completed: false, dueOn: null, public: false, assigneeStatus: null, sourceAssigneeId: null, sourceItemIds: [], sourceFollowerIds: [], stories: [
-						"user1 commented on Mon Nov 17 2014 22:44:22:\n\ncomment2",
-						"user1 commented on Mon Nov 17 2014 22:44:22:\n\ncomment1"
-					]
+                        "user1\ncomment1\nMon Nov 17 2014 22:44:22",
+                        "user1\ncomment2\nMon Nov 17 2014 22:44:22"
+                    ]
 				}
 			]);
 
@@ -267,11 +267,10 @@ describe("Importer", function() {
 			expect(client.workspaces.addUser).to.have.callCount(1);
 			expect(client.tasks.create).to.have.callCount(1);
 			expect(client.stories.createOnTask).to.have.callCount(2);
-			// reversed to get correct order
-			expect(client.stories.createOnTask.getCall(1).args[0]).to.equal(app.sourceToAsanaMap().at(300));
-			expect(client.stories.createOnTask.getCall(1).args[1]).to.deep.equal({ text: "user1 commented on Mon Nov 17 2014 22:44:22:\n\ncomment2" });
 			expect(client.stories.createOnTask.getCall(0).args[0]).to.equal(app.sourceToAsanaMap().at(300));
-			expect(client.stories.createOnTask.getCall(0).args[1]).to.deep.equal({ text: "user1 commented on Mon Nov 17 2014 22:44:22:\n\ncomment1" });
+			expect(client.stories.createOnTask.getCall(0).args[1]).to.deep.equal({ text: "user1\ncomment1\nMon Nov 17 2014 22:44:22" });
+            expect(client.stories.createOnTask.getCall(1).args[0]).to.equal(app.sourceToAsanaMap().at(300));
+            expect(client.stories.createOnTask.getCall(1).args[1]).to.deep.equal({ text: "user1\ncomment2\nMon Nov 17 2014 22:44:22" });
 		});
 	});
 
@@ -338,13 +337,13 @@ describe("Importer", function() {
 			client.tasks.addProject = sinon.spy(emptyMock);
 
 			exp.addObject(100, "Team", { name: "team1", team_type: "PUBLIC" });
-			exp.addObject(200, "ItemList", { name: "project1", description: "desc", is_project: true, is_archived: false, team: 100, items: [301, 300], assignee: null });
+			exp.addObject(200, "ItemList", { name: "project1", description: "desc", is_project: true, is_archived: false, team: 100, items: [301, 300], followers_du: [], assignee: null });
 			exp.addObject(300, "Task", { name: "task1", description: null, items: [], attachments: [], followers_du: [], stories: [] });
 			exp.addObject(301, "Task", { name: "task2", description: null, items: [], attachments: [], followers_du: [], stories: [] });
 			exp.prepareForImport();
 
 			expect(exp.projects().mapPerform("toJS")).to.deep.equal([
-				{ sourceId: 200, name: "project1", notes: "desc", sourceTeamId: 100, sourceMemberIds: [], sourceItemIds: [301, 300], archived: false, color: null, public: false }
+				{ sourceId: 200, name: "project1", notes: "desc", sourceTeamId: 100, sourceMemberIds: [], sourceItemIds: [301, 300], sourceFollowerIds: [], archived: false, color: null, public: false }
 			]);
 
 			importer._importTeams();
@@ -369,7 +368,7 @@ describe("Importer", function() {
 			client.tasks.create = sinon.spy(createMock);
 			client.tasks.addTag = sinon.spy(emptyMock);
 
-			exp.addObject(100, "ItemList", { name: "tag1", is_project: false, assignee: null, team: null, items: [301, 300] });
+			exp.addObject(100, "ItemList", { name: "tag1", is_project: false, assignee: null, team: null, items: [301, 300], followers_du: []});
 			exp.addObject(300, "Task", { name: "task1", description: null, items: [], attachments: [], followers_du: [], stories: [] });
 			exp.addObject(301, "Task", { name: "task2", description: null, items: [], attachments: [], followers_du: [], stories: [] });
 			exp.prepareForImport();
@@ -566,13 +565,13 @@ describe("Importer", function() {
 			exp.addUserAndDomainUser(100, 200, "user1", "user1@example.com");
 			exp.addUserAndDomainUser(101, 201, "user2", "user2@example.com");
 			exp.addObject(300, "Team", { name: "team1", team_type: "PUBLIC" });
-			exp.addObject(400, "ItemList", { name: "project1", description: "desc", is_project: true, is_archived: false, team: 300, items: [], assignee: null });
+			exp.addObject(400, "ItemList", { name: "project1", description: "desc", is_project: true, is_archived: false, team: 300, items: [], followers_du: [], assignee: null });
 			exp.addObject(500, "ProjectMembership", { project: 400, member: 200 });
 			exp.addObject(501, "ProjectMembership", { project: 400, member: 201 });
 			exp.prepareForImport();
 
 			expect(exp.projects().mapPerform("toJS")).to.deep.equal([
-				{ sourceId: 400, name: "project1", notes: "desc", archived: false, public: false, color: null, sourceTeamId: 300, sourceItemIds: [], sourceMemberIds: [100, 101] }
+				{ sourceId: 400, name: "project1", notes: "desc", archived: false, public: false, color: null, sourceTeamId: 300, sourceItemIds: [], sourceFollowerIds: [], sourceMemberIds: [100, 101] }
 			]);
 
 			importer._importTeams();

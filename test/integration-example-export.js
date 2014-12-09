@@ -45,7 +45,7 @@ describe("Importer", function() {
 			importer.run();
 
 			expect(exp.users().length).to.equal(3);
-			expect(exp.teams().length).to.equal(2);
+			expect(exp.teams().length).to.equal(3);
 			expect(exp.projects().length).to.equal(5);
 			expect(exp.taskDataSource()(0,1000).length).to.equal(25);
 			expect(exp.attachmentDataSource()(0,1000).length).to.equal(1);
@@ -58,7 +58,7 @@ describe("Importer", function() {
 			expect(client.tasks.create).to.have.callCount(25);
 			expect(client.tasks.update).to.have.callCount(6);
 			expect(client.tasks.setParent).to.have.callCount(6);
-			expect(client.teams.create).to.have.callCount(2);
+			expect(client.teams.create).to.have.callCount(3);
 			expect(client.workspaces.addUser).to.have.callCount(3);
 			expect(client.workspaces.tags).to.have.callCount(1);
 		});

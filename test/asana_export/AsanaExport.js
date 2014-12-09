@@ -177,9 +177,9 @@ describe("AsanaExport", function() {
 			exp.prepareForImport();
 
 			exp.taskDataSource()(0, 50)[0].stories().should.deep.equal([
-				"mike commented on Mon Nov 17 2014 22:44:22:\n\nMY COMMENT",
-				"mike removed the description",
-				"mike changed the name to \"task1\""
+                "mike\nMY COMMENT\nMon Nov 17 2014 22:44:22",
+                "mike removed the description\nMon Nov 17 2014 22:44:22",
+                "mike changed the name to \"task1\"\nMon Nov 17 2014 22:44:22"
 			]);
 		});
 
