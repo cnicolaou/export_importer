@@ -145,14 +145,15 @@ describe("Importer", function() {
 	describe("#_importStories", function() {
 		it("should add a story to the correct task", function() {
 			exp.setMockData({
-				tasks: [{ sourceId: 100, name: "task foo", sourceFollowerIds: [], stories: ["story text"] }]
+				tasks: [{ sourceId: 100, name: "task foo", sourceFollowerIds: [], stories: ["story 1", "story 2"] }]
 			});
 
 			importer._importTasks();
 			importer._importStories();
 
-			client.stories.createOnTask.should.have.been.calledOnce;
-			client.stories.createOnTask.should.have.been.calledWithExactly(app.sourceToAsanaMap().at(100), { text: "story text" });
+			client.stories.createOnTask.should.have.been.calledTwice;
+            client.stories.createOnTask.getCall(0).args.should.deep.equal([app.sourceToAsanaMap().at(100), { text: "story 1" }]);
+            client.stories.createOnTask.getCall(1).args.should.deep.equal([app.sourceToAsanaMap().at(100), { text: "story 2" }]);
 		});
 	});
 
