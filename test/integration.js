@@ -600,14 +600,15 @@ describe("Integration", function() {
 
             exp.addUserAndDomainUser(100, 200, "user1", "user1@example.com");
             exp.addUserAndDomainUser(101, 201, "user2", "user2@example.com");
+            exp.addUserAndDomainUser(102, 202, "user3", "user3@example.com");
             exp.addObject(300, "Team", { name: "team1", team_type: "PUBLIC" });
-            exp.addObject(400, "ItemList", { name: "project1", description: "desc", is_project: true, is_archived: false, team: 300, items: [], followers_du: [200, 201], assignee: null });
-            //exp.addObject(500, "ProjectMembership", { project: 400, member: 200 });
-            //exp.addObject(501, "ProjectMembership", { project: 400, member: 201 });
+            exp.addObject(400, "ItemList", { name: "project1", description: "desc", is_project: true, is_archived: false, team: 300, items: [], followers_du: [200, 201, 202], assignee: null });
+            exp.addObject(500, "ProjectMembership", { project: 400, member: 200 });
+            exp.addObject(501, "ProjectMembership", { project: 400, member: 201 });
             exp.prepareForImport();
 
             expect(exp.projects().mapPerform("toJS")).to.deep.equal([
-                { sourceId: 400, name: "project1", notes: "desc", archived: false, public: false, color: null, sourceTeamId: 300, sourceItemIds: [], sourceFollowerIds: [100, 101], sourceMemberIds: [] }
+                { sourceId: 400, name: "project1", notes: "desc", archived: false, public: false, color: null, sourceTeamId: 300, sourceItemIds: [], sourceFollowerIds: [100, 101], sourceMemberIds: [100, 101] }
             ]);
 
             importer._importTeams();
@@ -616,7 +617,7 @@ describe("Integration", function() {
             importer._importUsers();
             importer._addFollowersToProjects();
 
-            expect(client.workspaces.addUser).to.have.callCount(2);
+            expect(client.workspaces.addUser).to.have.callCount(3);
             expect(client.teams.create).to.have.callCount(1);
             expect(client.projects.create).to.have.callCount(1);
             expect(client.projects.addFollowers).to.have.callCount(1);
