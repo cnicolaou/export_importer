@@ -100,6 +100,23 @@ describe("AsanaExport", function() {
 				{ sourceId: 5, archived: false, name: "project1", color: null, notes: "description", sourceTeamId: 4, sourceMemberIds: [1], sourceItemIds: [10,11,12] }
 			]);
 		});
+
+        it("should return a project with only followers who are also project members", function() {
+            exp.addObject(1, "User", { name: "mike" });
+            exp.addObject(2, "VerifiedEmail", { ve_user: 1, ve_email: "mike@example.com" });
+            exp.addObject(3, "DomainUser", { user: 1 });
+            exp.addObject(4, "User", { name: "jim" });
+            exp.addObject(5, "VerifiedEmail", { ve_user: 4, ve_email: "jim@example.com" });
+            exp.addObject(6, "DomainUser", { user: 4 });
+            exp.addObject(4, "Team", { name: "team1", team_type: "REQUEST_TO_JOIN" });
+            exp.addObject(5, "ItemList", { followers_du: [3, 6], name: "project1", description: "description", is_project: true, is_archived: false, items: [10,11,12], team: 4, stories: [] });
+            exp.addObject(6, "ProjectMembership", { project: 5, member: 3 });
+            exp.prepareForImport();
+
+            exp.projects().mapPerform("performGets", ["sourceId", "archived", "name", "color", "notes", "sourceTeamId", "sourceMemberIds", "sourceFollowerIds", "sourceItemIds"]).should.deep.equal([
+                { sourceId: 5, archived: false, name: "project1", color: null, notes: "description", sourceTeamId: 4, sourceMemberIds: [1], sourceFollowerIds: [1], sourceItemIds: [10,11,12] }
+            ]);
+        });
 	});
 
 	describe("#tags()", function() {

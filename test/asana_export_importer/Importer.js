@@ -17,6 +17,7 @@ describe("Importer", function() {
 		sinon.spy(client.teams, "addUser");
 		sinon.spy(client.projects, "create");
 		sinon.spy(client.projects, "addMembers");
+        sinon.spy(client.projects, "addFollowers");
 		sinon.spy(client.tags, "create");
 		sinon.spy(client.tags, "createInWorkspace");
 		sinon.spy(client.tasks, "create");
@@ -342,4 +343,26 @@ describe("Importer", function() {
 			});
 		});
 	});
+
+    describe("#_addFollowersToProjects", function() {
+        it("should add two followers to a project with one API call", function() {
+            exp.setMockData({
+                users: [
+                    { sourceId: 100, name: "user1", email: "user1@example.com" },
+                    { sourceId: 101, name: "user2", email: "user2@example.com" }
+                ],
+                projects: [{ sourceId: 200, archived: false, name: "project1", sourceTeamId: null, sourceMemberIds: [], sourceFollowerIds: [100, 101] }]
+            });
+
+            //importer._importTasks();
+            importer._importUsers();
+            importer._addFollowersToProjects();
+
+            client.projects.addFollowers.should.have.been.calledOnce;
+            client.projects.addFollowers.should.have.been.calledWithExactly(app.sourceToAsanaMap().at(200), {
+                followers: [100, 101].map(function(id) { return app.sourceToAsanaMap().at(id); }),
+                silent: true
+            });
+        });
+    });
 });
