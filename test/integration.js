@@ -190,13 +190,13 @@ describe("Integration", function() {
 		});
 
 		it("should create a task with and without various properties", function() {
-			exp.addObject(100, "Task", { name: "task1", items: [], stories: [], attachments: [], followers_du: [] });
-			exp.addObject(101, "Task", { name: "task2", description: "desc", completed: true, schedule_status: "UPCOMING", due_date:"2023-11-30 00:00:00", items: [], stories: [], attachments: [], followers_du: [] });
+			exp.addObject(100, "Task", { name: "task1", items: [], stories: [], attachments: [], followers_du: [], __creation_time: "2014-11-16 22:44:11" });
+			exp.addObject(101, "Task", { name: "task2", description: "desc", completed: true, schedule_status: "UPCOMING", due_date:"2023-11-30 00:00:00", items: [], stories: [], attachments: [], followers_du: [], __creation_time: "2014-11-16 22:44:11" });
 			exp.prepareForImport();
 
 			expect(exp.taskDataSource()(0,50).mapPerform("toJS")).to.deep.equal([
-				{ sourceId: 100, name: "task1", notes: "", completed: false, dueOn: null, public: false, assigneeStatus: null, sourceAssigneeId: null, sourceItemIds: [], sourceFollowerIds: [], stories: [] },
-				{ sourceId: 101, name: "task2", notes: "desc", completed: true, dueOn: "2023-11-30 00:00:00", public: false, assigneeStatus: "upcoming", sourceAssigneeId: null, sourceItemIds: [], sourceFollowerIds: [], stories: [] }
+				{ sourceId: 100, name: "task1", notes: "", completed: false, dueOn: null, public: false, assigneeStatus: null, sourceAssigneeId: null, sourceItemIds: [], sourceFollowerIds: [], stories: ["created task.\nSun Nov 16 2014"] },
+				{ sourceId: 101, name: "task2", notes: "desc", completed: true, dueOn: "2023-11-30 00:00:00", public: false, assigneeStatus: "upcoming", sourceAssigneeId: null, sourceItemIds: [], sourceFollowerIds: [], stories: ["created task.\nSun Nov 16 2014"] }
 			]);
 
 			importer._importTasks();
@@ -224,9 +224,9 @@ describe("Integration", function() {
 			exp.prepareForImport();
 
 			expect(exp.taskDataSource()(0,50).mapPerform("toJS")).to.deep.equal([
-				{ sourceId: 100, name: "task1", notes: "", completed: false, dueOn: null, public: true, assigneeStatus: null, sourceAssigneeId: null, sourceItemIds: [], sourceFollowerIds: [], stories: [] },
-				{ sourceId: 101, name: "task2", notes: "", completed: false, dueOn: null, public: false, assigneeStatus: null, sourceAssigneeId: null, sourceItemIds: [], sourceFollowerIds: [], stories: [] },
-				{ sourceId: 102, name: "task3", notes: "", completed: false, dueOn: null, public: false, assigneeStatus: null, sourceAssigneeId: null, sourceItemIds: [], sourceFollowerIds: [], stories: [] }
+				{ sourceId: 100, name: "task1", notes: "", completed: false, dueOn: null, public: true, assigneeStatus: null, sourceAssigneeId: null, sourceItemIds: [], sourceFollowerIds: [], stories: ["created task.\nWed Dec 31 1969"] },
+				{ sourceId: 101, name: "task2", notes: "", completed: false, dueOn: null, public: false, assigneeStatus: null, sourceAssigneeId: null, sourceItemIds: [], sourceFollowerIds: [], stories: ["created task.\nWed Dec 31 1969"] },
+				{ sourceId: 102, name: "task3", notes: "", completed: false, dueOn: null, public: false, assigneeStatus: null, sourceAssigneeId: null, sourceItemIds: [], sourceFollowerIds: [], stories: ["created task.\nWed Dec 31 1969"] }
 			]);
 
 			importer._importTasks();
@@ -254,8 +254,9 @@ describe("Integration", function() {
 			expect(exp.taskDataSource()(0,50).mapPerform("toJS")).to.deep.equal([
 				{
 					sourceId: 300, name: "task1", notes: "", completed: false, dueOn: null, public: false, assigneeStatus: null, sourceAssigneeId: null, sourceItemIds: [], sourceFollowerIds: [], stories: [
-                        "user1\ncomment1\nMon Nov 17 2014 22:44:22",
-                        "user1\ncomment2\nMon Nov 17 2014 22:44:22"
+                        "created task.\nWed Dec 31 1969",
+                        "user1\ncomment1\nMon Nov 17 2014",
+                        "user1\ncomment2\nMon Nov 17 2014"
                     ]
 				}
 			]);
@@ -266,11 +267,13 @@ describe("Integration", function() {
 
 			expect(client.workspaces.addUser).to.have.callCount(1);
 			expect(client.tasks.create).to.have.callCount(1);
-			expect(client.stories.createOnTask).to.have.callCount(2);
+			expect(client.stories.createOnTask).to.have.callCount(3);
 			expect(client.stories.createOnTask.getCall(0).args[0]).to.equal(app.sourceToAsanaMap().at(300));
-			expect(client.stories.createOnTask.getCall(0).args[1]).to.deep.equal({ text: "user1\ncomment1\nMon Nov 17 2014 22:44:22" });
-            expect(client.stories.createOnTask.getCall(1).args[0]).to.equal(app.sourceToAsanaMap().at(300));
-            expect(client.stories.createOnTask.getCall(1).args[1]).to.deep.equal({ text: "user1\ncomment2\nMon Nov 17 2014 22:44:22" });
+			expect(client.stories.createOnTask.getCall(0).args[1]).to.deep.equal({ text: "created task.\nWed Dec 31 1969" });
+			expect(client.stories.createOnTask.getCall(1).args[0]).to.equal(app.sourceToAsanaMap().at(300));
+			expect(client.stories.createOnTask.getCall(1).args[1]).to.deep.equal({ text: "user1\ncomment1\nMon Nov 17 2014" });
+            expect(client.stories.createOnTask.getCall(2).args[0]).to.equal(app.sourceToAsanaMap().at(300));
+            expect(client.stories.createOnTask.getCall(2).args[1]).to.deep.equal({ text: "user1\ncomment2\nMon Nov 17 2014" });
 		});
 	});
 
@@ -313,9 +316,9 @@ describe("Integration", function() {
 			exp.prepareForImport();
 
 			expect(exp.taskDataSource()(0,50).mapPerform("toJS")).to.deep.equal([
-				{ sourceId: 100, name: "task1",    notes: "", completed: false, dueOn: null, public: false, assigneeStatus: null, sourceAssigneeId: null, sourceItemIds: [202, 201], sourceFollowerIds: [], stories: [] },
-				{ sourceId: 201, name: "subtask2", notes: "", completed: false, dueOn: null, public: false, assigneeStatus: null, sourceAssigneeId: null, sourceItemIds: [],         sourceFollowerIds: [], stories: [] },
-				{ sourceId: 202, name: "subtask3", notes: "", completed: false, dueOn: null, public: false, assigneeStatus: null, sourceAssigneeId: null, sourceItemIds: [],         sourceFollowerIds: [], stories: [] }
+				{ sourceId: 100, name: "task1",    notes: "", completed: false, dueOn: null, public: false, assigneeStatus: null, sourceAssigneeId: null, sourceItemIds: [202, 201], sourceFollowerIds: [], stories: ["created task.\nWed Dec 31 1969"] },
+				{ sourceId: 201, name: "subtask2", notes: "", completed: false, dueOn: null, public: false, assigneeStatus: null, sourceAssigneeId: null, sourceItemIds: [],         sourceFollowerIds: [], stories: ["created task.\nWed Dec 31 1969"] },
+				{ sourceId: 202, name: "subtask3", notes: "", completed: false, dueOn: null, public: false, assigneeStatus: null, sourceAssigneeId: null, sourceItemIds: [],         sourceFollowerIds: [], stories: ["created task.\nWed Dec 31 1969"] }
 			]);
 
 			importer._importTasks();
@@ -480,7 +483,7 @@ describe("Integration", function() {
 			exp.prepareForImport();
 
 			expect(exp.taskDataSource()(0,50).mapPerform("toJS")).to.deep.equal([
-				{ sourceId: 300, name: "task1", notes: "", completed: false, dueOn: null, public: false, assigneeStatus: null, sourceAssigneeId: null, sourceItemIds: [], sourceFollowerIds: [100, 101], stories: [] }
+				{ sourceId: 300, name: "task1", notes: "", completed: false, dueOn: null, public: false, assigneeStatus: null, sourceAssigneeId: null, sourceItemIds: [], sourceFollowerIds: [100, 101], stories: ["created task.\nWed Dec 31 1969"] }
 			]);
 
 			importer._importTasks();

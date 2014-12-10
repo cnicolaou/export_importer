@@ -187,25 +187,28 @@ describe("AsanaExport", function() {
 			exp.addObject(1, "User", { name: "mike" });
 			exp.addObject(2, "VerifiedEmail", { ve_user: 1, ve_email: "mike@example.com" });
 			exp.addObject(3, "DomainUser", { user: 1 });
-			exp.addObject(4, "Task", { name: "task1", schedule_status: "UPCOMING", due_date:"2023-11-30 00:00:00", description: "description", attachments: [2], items: [], stories: [5, 7, 6], followers_du: [] });
+			exp.addObject(4, "Task", { name: "task1", schedule_status: "UPCOMING", due_date:"2023-11-30 00:00:00", description: "description", attachments: [2], items: [], stories: [5, 7, 6], followers_du: [], __creation_time: "2014-11-16 22:44:11" });
 			exp.addObject(5, "Comment", { creator_du: 3, __creation_time: "2014-11-17 22:44:22", text: "MY COMMENT" });
 			exp.addObject(6, "TaskNameChangedStory", { creator_du: 3, __creation_time: "2014-11-17 22:44:22", text: "changed the name to \"task1\"" });
 			exp.addObject(7, "TaskDescriptionChangedStory", { creator_du: 3, __creation_time: "2014-11-17 22:44:22", text: "removed the description" });
 			exp.prepareForImport();
 
 			exp.taskDataSource()(0, 50)[0].stories().should.deep.equal([
-                "mike\nMY COMMENT\nMon Nov 17 2014 22:44:22",
-                "mike removed the description\nMon Nov 17 2014 22:44:22",
-                "mike changed the name to \"task1\"\nMon Nov 17 2014 22:44:22"
+                "created task.\nSun Nov 16 2014",
+                "mike\nMY COMMENT\nMon Nov 17 2014",
+                "mike removed the description\nMon Nov 17 2014",
+                "mike changed the name to \"task1\"\nMon Nov 17 2014"
 			]);
 		});
 
 		it("should not include AddAttachmentStory", function() {
-			exp.addObject(1, "Task", { name: "task1", schedule_status: "UPCOMING", due_date:"2023-11-30 00:00:00", description: "description", attachments: [], items: [], stories: [2], followers_du: [] });
+			exp.addObject(1, "Task", { name: "task1", schedule_status: "UPCOMING", due_date:"2023-11-30 00:00:00", description: "description", attachments: [], items: [], stories: [2], followers_du: [], __creation_time: "2014-11-16 22:44:11" });
 			exp.addObject(2, "AddAttachmentStory", { creator_du: null, __creation_time: "2014-11-17 22:44:22", text: "removed the description" });
 			exp.prepareForImport();
 
-			exp.taskDataSource()(0, 50)[0].stories().length.should.equal(0);
+            exp.taskDataSource()(0, 50)[0].stories().should.deep.equal([
+                "created task.\nSun Nov 16 2014"
+            ]);
 		});
 	});
 
