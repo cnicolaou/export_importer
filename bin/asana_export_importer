@@ -2,6 +2,7 @@
 
 var aei = require("../lib/asana_export_importer");
 var docopt = require("docopt").docopt;
+var fs = require("fs");
 
 binName = require("path").basename(process.argv[1]);
 
@@ -16,8 +17,8 @@ exports.doc =
 "  --organization=<id>   Asana organization ID.\n" +
 "  --api-key=<key>       Asana API key.\n" +
 "  --api-endpoint=<url>  Asana API endpoint [default: " + aei.asana.Dispatcher.ROOT_URL + "]\n" +
-"  --attachments=<file>  Attachments file to write to [default: db/attachments.json]\n" +
-"  --databases=<dir>     Base directory for temporary databases [default: db]\n" +
+"  --attachments=<file>  Attachments file to write to, relative to the databases directory [default: attachments.json]\n" +
+"  --databases=<dir>     Base directory for temporary databases [default: construct_from_path_and_org]\n" +
 "  --resumable=<bool>    Enable resuming [default: true]\n" +
 "  --retries=<count>     Maximum number of times to retry (0 = no retry) [default: 5]\n" +
 "  --retry-delay=<ms>    Milliseconds to wait before retrying [default: 500]\n" +
@@ -78,14 +79,24 @@ exports.initApp = function(options) {
 	require("http").globalAgent.maxSockets = options.concurrency;
 	require("https").globalAgent.maxSockets = options.concurrency;
 
+	var databasesPath = options.databasesPath;
+	if (databasesPath === "construct_from_path_and_org") {
+        databasesPath = "db-" + require("path").basename(options.path) + "-" + options.organization;
+        console.log("Using databases path: " + databasesPath);
+	}
+
+	if (!fs.existsSync(databasesPath)){
+        fs.mkdirSync(databasesPath);
+    }
+
 	app.importer().export().setPath(options.path);
 	app.importer().export().setBatchSize(options.batchSize);
-	app.importer().export().setDbDirectory(options.databasesPath);
+	app.importer().export().setDbDirectory(databasesPath);
 
-	app.sourceToAsanaMap().setDbPath(options.databasesPath + "/mapping.sqlite");
+	app.sourceToAsanaMap().setDbPath(databasesPath + "/mapping.sqlite");
 	app.sourceToAsanaMap().setReadOnly(options.dryRun);
 
-	app.setAttachmentsPath(options.attachmentsPath);
+	app.setAttachmentsPath(databasesPath + "/" + options.attachmentsPath);
 
 	if (options.dryRun) {
 		app.setClient(aei.AsanaClientMock.clone());
@@ -97,7 +108,7 @@ exports.initApp = function(options) {
 
 	if (options.resumable) {
 		app.setClientCache(aei.AsanaClientCache.clone());
-		app.clientCache().setDbPath(options.databasesPath + "/cache.sqlite");
+		app.clientCache().setDbPath(databasesPath + "/cache.sqlite");
 		app.clientCache().setReadOnly(options.dryRun);
 	}
 
