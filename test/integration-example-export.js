@@ -56,7 +56,7 @@ describe("Importer", function() {
 			expect(client.tasks.addProject).to.have.callCount(20);
 			expect(client.tasks.addTag).to.have.callCount(5);
 			expect(client.tasks.create).to.have.callCount(25);
-			expect(client.tasks.update).to.have.callCount(6);
+			expect(client.tasks.update).to.have.callCount(12);
 			expect(client.tasks.setParent).to.have.callCount(6);
 			expect(client.teams.create).to.have.callCount(3);
 			expect(client.workspaces.addUser).to.have.callCount(3);
