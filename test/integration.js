@@ -202,8 +202,8 @@ describe("Integration", function() {
 			importer._importTasks();
 
 			expect(client.tasks.create).to.have.callCount(2);
-			expect(client.tasks.create).to.have.been.calledWithExactly({ workspace: orgId, name: "task1", notes: "", completed: false, due_on: null, force_public: false, assignee_status: null, hearted: false });
-			expect(client.tasks.create).to.have.been.calledWithExactly({ workspace: orgId, name: "task2", notes: "desc", completed: true, due_on: "2023-11-30 00:00:00", force_public: false, assignee_status: "upcoming", hearted: false });
+			expect(client.tasks.create).to.have.been.calledWithExactly({ workspace: orgId, name: "task1", notes: "", completed: false, due_on: null, force_public: false, hearted: false });
+			expect(client.tasks.create).to.have.been.calledWithExactly({ workspace: orgId, name: "task2", notes: "desc", completed: true, due_on: "2023-11-30 00:00:00", force_public: false, hearted: false });
 		});
 
 		it("should not create trashed tasks", function() {
@@ -232,9 +232,9 @@ describe("Integration", function() {
 			importer._importTasks();
 
 			expect(client.tasks.create).to.have.callCount(3);
-			expect(client.tasks.create).to.have.been.calledWithExactly({ workspace: orgId, name: "task1", notes: "", completed: false, due_on: null, assignee_status: null, hearted: false, force_public: true });
-			expect(client.tasks.create).to.have.been.calledWithExactly({ workspace: orgId, name: "task2", notes: "", completed: false, due_on: null, assignee_status: null, hearted: false, force_public: false });
-			expect(client.tasks.create).to.have.been.calledWithExactly({ workspace: orgId, name: "task3", notes: "", completed: false, due_on: null, assignee_status: null, hearted: false, force_public: false });
+			expect(client.tasks.create).to.have.been.calledWithExactly({ workspace: orgId, name: "task1", notes: "", completed: false, due_on: null, hearted: false, force_public: true });
+			expect(client.tasks.create).to.have.been.calledWithExactly({ workspace: orgId, name: "task2", notes: "", completed: false, due_on: null, hearted: false, force_public: false });
+			expect(client.tasks.create).to.have.been.calledWithExactly({ workspace: orgId, name: "task3", notes: "", completed: false, due_on: null, hearted: false, force_public: false });
 		});
 	});
 
