@@ -278,6 +278,36 @@ describe("Importer", function() {
 		});
 	});
 
+    describe("#_addAssigneeStatusesToTasks", function() {
+        it("should set the assignee status of a task", function() {
+            exp.setMockData({
+                users: [{ sourceid: 100, name: "user1", email: "user1@example.com", sourceitemids: [] }],
+                tasks: [{ sourceid: 101, name: "task1", sourcefollowerids: [], assigneeStatus: "today", sourceAssigneeId: 100 }]
+            });
+
+            importer._importTasks();
+            importer._importUsers();
+            importer._addTaskAssigneeStatuses();
+
+            client.tasks.update.should.have.been.calledOnce;
+            client.tasks.update.should.have.been.calledWithExactly(app.sourceToAsanaMap().at(101), {
+                assignee_status: "today"
+            });
+        });
+
+        it("should not set the assignee status of a task with no assignee", function() {
+            exp.setMockData({
+                tasks: [{ sourceid: 101, name: "task1", sourcefollowerids: [], assigneeStatus: "today" }]
+            });
+
+            importer._importTasks();
+            importer._importUsers();
+            importer._addTaskAssigneeStatuses();
+
+            client.tasks.update.should.not.have.been.called;
+        });
+    });
+
 	describe("#_addFollowersToTasks", function() {
 		it("should add multiple followers to a task with a single request", function() {
 			exp.setMockData({

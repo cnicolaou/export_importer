@@ -491,6 +491,35 @@ describe("Integration", function() {
 		});
 	});
 
+    describe("#_addAssigneeStatusesToTasks", function() {
+        it("should set the assignee status of tasks", function() {
+            client.tasks.create = sinon.spy(createMock);
+            client.tasks.update = sinon.spy(createMock);
+
+            exp.addUserAndDomainUser(100, 200, "user1", "user1@example.com", 300);
+            exp.addObject(300, "Task", { name: "task1", items: [], stories: [], attachments: [], followers_du: [], schedule_status: "UPCOMING" });
+            exp.addObject(301, "Task", { name: "task2", items: [], stories: [], attachments: [], followers_du: [], schedule_status: "UPCOMING", assignee: 200 });
+            exp.addObject(302, "Task", { name: "task3", items: [], stories: [], attachments: [], followers_du: [], schedule_status: "OK", assignee: 200 });
+            exp.addObject(303, "Task", { name: "task4", items: [], stories: [], attachments: [], followers_du: [], schedule_status: "TODAY", assignee: 200 });
+            exp.prepareForImport();
+
+            expect(exp.taskDataSource()(0,50).mapPerform("toJS")).to.deep.equal([
+                { sourceId: 300, name: "task1", notes: "", completed: false, dueOn: null, public: false, assigneeStatus: "upcoming", sourceAssigneeId: null, sourceItemIds: [], sourceFollowerIds: [], stories: [] },
+                { sourceId: 301, name: "task2", notes: "", completed: false, dueOn: null, public: false, assigneeStatus: "upcoming", sourceAssigneeId: 100, sourceItemIds: [], sourceFollowerIds: [], stories: [] },
+                { sourceId: 302, name: "task3", notes: "", completed: false, dueOn: null, public: false, assigneeStatus: "later", sourceAssigneeId: 100, sourceItemIds: [], sourceFollowerIds: [], stories: [] },
+                { sourceId: 303, name: "task4", notes: "", completed: false, dueOn: null, public: false, assigneeStatus: "today", sourceAssigneeId: 100, sourceItemIds: [], sourceFollowerIds: [], stories: [] },
+            ]);
+
+            importer._importTasks();
+            importer._addTaskAssigneeStatuses();
+
+            expect(client.tasks.update).to.have.callCount(3);
+            expect(client.tasks.update).to.have.been.calledWithExactly(app.sourceToAsanaMap().at(301), { assignee_status: "upcoming" });
+            expect(client.tasks.update).to.have.been.calledWithExactly(app.sourceToAsanaMap().at(302), { assignee_status: "later" });
+            expect(client.tasks.update).to.have.been.calledWithExactly(app.sourceToAsanaMap().at(303), { assignee_status: "today" });
+        });
+    });
+
 	describe("#_addFollowersToTasks", function() {
 		it("should add multiple followers to a task with a single request", function() {
 			client.workspaces.addUser = sinon.spy(createMock);
