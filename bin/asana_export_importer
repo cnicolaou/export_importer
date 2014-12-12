@@ -3,8 +3,9 @@
 var aei = require("../lib/asana_export_importer");
 var docopt = require("docopt").docopt;
 var fs = require("fs");
+var path = require("path");
 
-binName = require("path").basename(process.argv[1]);
+binName = path.basename(process.argv[1]);
 
 exports.doc =
 "Usage:\n"+
@@ -81,7 +82,7 @@ exports.initApp = function(options) {
 
 	var databasesPath = options.databasesPath;
 	if (databasesPath === "construct_from_path_and_org") {
-        databasesPath = "db-" + require("path").basename(options.path) + "-" + options.organization;
+        databasesPath = "db-" + path.basename(options.path) + "-" + options.organization;
         console.log("Using databases path: " + databasesPath);
 	}
 
