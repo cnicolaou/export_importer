@@ -252,9 +252,9 @@ describe("Integration", function() {
 			importer._importTasks();
 
 			expect(client.tasks.create).to.have.callCount(3);
-			expect(client.tasks.create).to.have.been.calledWithExactly({ workspace: orgId, name: "task1", notes: "", completed: false, due_on: null, assignee_status: null, hearted: false, force_public: false, recurrence: { type: "NEVER", data: null } });
-			expect(client.tasks.create).to.have.been.calledWithExactly({ workspace: orgId, name: "task2", notes: "", completed: false, due_on: null, assignee_status: null, hearted: false, force_public: false, recurrence: { type: "PERIODICALLY", data: "{\"days_after_completion\":4,\"original_due_date\":1418342400000}" } });
-			expect(client.tasks.create).to.have.been.calledWithExactly({ workspace: orgId, name: "task3", notes: "", completed: false, due_on: null, assignee_status: null, hearted: false, force_public: false, recurrence: { type: "WEEKLY", data: "{\"days_of_week\":[3,5],\"original_due_date\":1418342400000}" } });
+			expect(client.tasks.create).to.have.been.calledWithExactly({ workspace: orgId, name: "task1", notes: "", completed: false, due_on: null, hearted: false, force_public: false, recurrence: { type: "NEVER", data: null } });
+			expect(client.tasks.create).to.have.been.calledWithExactly({ workspace: orgId, name: "task2", notes: "", completed: false, due_on: null, hearted: false, force_public: false, recurrence: { type: "PERIODICALLY", data: "{\"days_after_completion\":4,\"original_due_date\":1418342400000}" } });
+			expect(client.tasks.create).to.have.been.calledWithExactly({ workspace: orgId, name: "task3", notes: "", completed: false, due_on: null, hearted: false, force_public: false, recurrence: { type: "WEEKLY", data: "{\"days_of_week\":[3,5],\"original_due_date\":1418342400000}" } });
 		});
 	});
 
