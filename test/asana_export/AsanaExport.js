@@ -100,6 +100,23 @@ describe("AsanaExport", function() {
 				{ sourceId: 5, archived: false, name: "project1", color: null, notes: "description", sourceTeamId: 4, sourceMemberIds: [1], sourceItemIds: [10,11,12] }
 			]);
 		});
+
+        it("should return a project with only followers who are also project members", function() {
+            exp.addObject(1, "User", { name: "mike" });
+            exp.addObject(2, "VerifiedEmail", { ve_user: 1, ve_email: "mike@example.com" });
+            exp.addObject(3, "DomainUser", { user: 1 });
+            exp.addObject(4, "User", { name: "jim" });
+            exp.addObject(5, "VerifiedEmail", { ve_user: 4, ve_email: "jim@example.com" });
+            exp.addObject(6, "DomainUser", { user: 4 });
+            exp.addObject(4, "Team", { name: "team1", team_type: "REQUEST_TO_JOIN" });
+            exp.addObject(5, "ItemList", { followers_du: [3, 6], name: "project1", description: "description", is_project: true, is_archived: false, items: [10,11,12], team: 4, stories: [] });
+            exp.addObject(6, "ProjectMembership", { project: 5, member: 3 });
+            exp.prepareForImport();
+
+            exp.projects().mapPerform("performGets", ["sourceId", "archived", "name", "color", "notes", "sourceTeamId", "sourceMemberIds", "sourceFollowerIds", "sourceItemIds"]).should.deep.equal([
+                { sourceId: 5, archived: false, name: "project1", color: null, notes: "description", sourceTeamId: 4, sourceMemberIds: [1], sourceFollowerIds: [1], sourceItemIds: [10,11,12] }
+            ]);
+        });
 	});
 
 	describe("#tags()", function() {
@@ -170,25 +187,28 @@ describe("AsanaExport", function() {
 			exp.addObject(1, "User", { name: "mike" });
 			exp.addObject(2, "VerifiedEmail", { ve_user: 1, ve_email: "mike@example.com" });
 			exp.addObject(3, "DomainUser", { user: 1 });
-			exp.addObject(4, "Task", { name: "task1", schedule_status: "UPCOMING", due_date:"2023-11-30 00:00:00", description: "description", attachments: [2], items: [], stories: [5, 7, 6], followers_du: [] });
+			exp.addObject(4, "Task", { name: "task1", schedule_status: "UPCOMING", due_date:"2023-11-30 00:00:00", description: "description", attachments: [2], items: [], stories: [5, 7, 6], followers_du: [], __creation_time: "2014-11-16 22:44:11" });
 			exp.addObject(5, "Comment", { creator_du: 3, __creation_time: "2014-11-17 22:44:22", text: "MY COMMENT" });
 			exp.addObject(6, "TaskNameChangedStory", { creator_du: 3, __creation_time: "2014-11-17 22:44:22", text: "changed the name to \"task1\"" });
 			exp.addObject(7, "TaskDescriptionChangedStory", { creator_du: 3, __creation_time: "2014-11-17 22:44:22", text: "removed the description" });
 			exp.prepareForImport();
 
 			exp.taskDataSource()(0, 50)[0].stories().should.deep.equal([
-                "mike\nMY COMMENT\nMon Nov 17 2014 22:44:22",
-                "mike removed the description\nMon Nov 17 2014 22:44:22",
-                "mike changed the name to \"task1\"\nMon Nov 17 2014 22:44:22"
+                "created task.\nSun Nov 16 2014",
+                "mike\nMY COMMENT\nMon Nov 17 2014",
+                "mike removed the description\nMon Nov 17 2014",
+                "mike changed the name to \"task1\"\nMon Nov 17 2014"
 			]);
 		});
 
 		it("should not include AddAttachmentStory", function() {
-			exp.addObject(1, "Task", { name: "task1", schedule_status: "UPCOMING", due_date:"2023-11-30 00:00:00", description: "description", attachments: [], items: [], stories: [2], followers_du: [] });
+			exp.addObject(1, "Task", { name: "task1", schedule_status: "UPCOMING", due_date:"2023-11-30 00:00:00", description: "description", attachments: [], items: [], stories: [2], followers_du: [], __creation_time: "2014-11-16 22:44:11" });
 			exp.addObject(2, "AddAttachmentStory", { creator_du: null, __creation_time: "2014-11-17 22:44:22", text: "removed the description" });
 			exp.prepareForImport();
 
-			exp.taskDataSource()(0, 50)[0].stories().length.should.equal(0);
+            exp.taskDataSource()(0, 50)[0].stories().should.deep.equal([
+                "created task.\nSun Nov 16 2014"
+            ]);
 		});
 	});
 
