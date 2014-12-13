@@ -156,8 +156,8 @@ describe("AsanaExport", function() {
 			exp.addObject(4, "Team", { name: "team1", team_type: "REQUEST_TO_JOIN" });
 			exp.addObject(5, "ItemList", { followers_du: [], name: "project1", description: "description", is_project: true, is_archived: false, items: [7], team: 4, stories: [] });
 			exp.addObject(6, "ItemList", { followers_du: [], name: "tag1", is_project: false, is_archived: false, items: [7], team: 4, stories: [] });
-			exp.addObject(7, "Task", { name: "task1", schedule_status: "UPCOMING", due_date:"2023-11-30 00:00:00", description: "description", assignee: 3, attachments: [], items: [8], stories: [], followers_du: [3] });
-			exp.addObject(8, "Task", { name: "subtask1", schedule_status: "UPCOMING", due_date:"2023-11-30 00:00:00", description: "description", assignee: 3, attachments: [], items: [], stories: [], followers_du: [3] });
+			exp.addObject(7, "Task", { name: "task1", schedule_status: "UPCOMING", due_date:"2023-11-30 00:00:00", rich_description: "description", assignee: 3, attachments: [], items: [8], stories: [], followers_du: [3] });
+			exp.addObject(8, "Task", { name: "subtask1", schedule_status: "UPCOMING", due_date:"2023-11-30 00:00:00", rich_description: "description", assignee: 3, attachments: [], items: [], stories: [], followers_du: [3] });
 			exp.prepareForImport();
 
 			exp.taskDataSource()(0, 50).mapPerform("performGets", ["sourceId", "name", "notes", "completed", "assigneeStatus", "dueOn", "sourceItemIds", "sourceAssigneeId", "sourceFollowerIds"]).should.deep.equal([
