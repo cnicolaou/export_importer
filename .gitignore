@@ -4,6 +4,7 @@ profile
 
 node_modules
 db/*
+db-*/*
 .idea
 coverage/*
 *.sublime-*
