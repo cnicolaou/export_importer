@@ -36,8 +36,7 @@ global.AsanaExportInMemory = ae.AsanaExport.extend().setSlots({
 	},
 	addUserAndDomainUser: function(userId, domainUserId, name, email, taskList) {
 		this.addObject(userId, "User", { name: name });
-		this.addObject(this._sourceIdCounter++, "VerifiedEmail", { ve_user: userId, ve_email: email });
-		this.addObject(domainUserId, "DomainUser", { user: userId, task_list: taskList });
+		this.addObject(domainUserId, "DomainUser", { user: userId, task_list: taskList, email: email });
 	}
 });
 

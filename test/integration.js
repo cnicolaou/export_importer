@@ -435,8 +435,7 @@ describe("Integration", function() {
 			client.workspaces.addUser = sinon.spy(createMock);
 
 			exp.addObject(100, "User", { name: "user1", deactivated: true });
-			exp.addObject(200, "VerifiedEmail", { ve_user: 100, ve_email: "user1@example.com" });
-			exp.addObject(300, "DomainUser", { user: 100, task_list: null });
+			exp.addObject(300, "DomainUser", { user: 100, task_list: null, email: "user1@example.com" });
 			exp.prepareForImport();
 
 			expect(exp.users().mapPerform("toJS")).to.deep.equal([]);
@@ -450,8 +449,7 @@ describe("Integration", function() {
 			client.workspaces.addUser = sinon.spy(createMock);
 
 			exp.addObject(100, "User", { name: "user1", deactivated: false });
-			exp.addObject(200, "VerifiedEmail", { ve_user: 100, ve_email: "user1@example.com" });
-			exp.addObject(300, "DomainUser", { user: 100, task_list: null, active: false });
+			exp.addObject(300, "DomainUser", { user: 100, task_list: null, active: false, email: "user1@example.com" });
 			exp.prepareForImport();
 
 			expect(exp.users().mapPerform("toJS")).to.deep.equal([]);
