@@ -27,7 +27,7 @@ describe("Integration", function() {
 
 	describe("#run()", function() {
 		it("should run with no data", function() {
-			client.workspaces.tags = sinon.stub().returns(Promise.resolve([]));
+			client.tags.findByWorkspace = sinon.stub().returns(Promise.resolve([]));
 
 			importer.run();
 
@@ -141,7 +141,7 @@ describe("Integration", function() {
 		it("should create a tag with and without a team", function() {
 			client.teams.create = sinon.spy(createMock);
 			client.tags.createInWorkspace = sinon.spy(createMock);
-			client.workspaces.tags = sinon.stub().returns(Promise.resolve([]));
+			client.tags.findByWorkspace = sinon.stub().returns(Promise.resolve([]));
 
 			exp.addObject(100, "Team", { name: "team1", is_project: false, assignee: null, team_type: null });
 			exp.addObject(200, "ItemList", { name: "tag1", is_project: false, assignee: null, team: null, items: [], followers_du: [] });
@@ -158,14 +158,14 @@ describe("Integration", function() {
 
 			expect(client.teams.create).to.have.callCount(1);
 			expect(client.tags.createInWorkspace).to.have.callCount(2);
-			expect(client.workspaces.tags).to.have.callCount(1);
+			expect(client.tags.findByWorkspace ).to.have.callCount(1);
 			expect(client.tags.createInWorkspace).to.have.been.calledWithExactly(orgId, { name: "tag1", team: null });
 			expect(client.tags.createInWorkspace).to.have.been.calledWithExactly(orgId, { name: "tag2", team: app.sourceToAsanaMap().at(100) });
 		});
 
 		it("should not create duplicate tags", function() {
 			client.tags.createInWorkspace = sinon.spy(createMock);
-			client.workspaces.tags = sinon.stub().returns(Promise.resolve([
+			client.tags.findByWorkspace = sinon.stub().returns(Promise.resolve([
 				{ name: "tag1", id: 1 }
 			]));
 
@@ -179,7 +179,7 @@ describe("Integration", function() {
 			importer._importTags();
 
 			expect(client.tags.createInWorkspace).to.have.callCount(0);
-			expect(client.workspaces.tags).to.have.callCount(1);
+			expect(client.tags.findByWorkspace ).to.have.callCount(1);
 			expect(app.sourceToAsanaMap().at(100)).to.equal(1);
 		});
 	});
@@ -347,8 +347,8 @@ describe("Integration", function() {
 			expect(client.tasks.create).to.have.callCount(3);
 			expect(client.tasks.setParent).to.have.callCount(2);
 			// reversed to get correct order
-			expect(client.tasks.setParent.getCall(1).args).to.deep.equal([app.sourceToAsanaMap().at(202), { parent: app.sourceToAsanaMap().at(100) }])
-			expect(client.tasks.setParent.getCall(0).args).to.deep.equal([app.sourceToAsanaMap().at(201), { parent: app.sourceToAsanaMap().at(100) }])
+			expect(client.tasks.setParent.getCall(1).args).to.deep.equal([app.sourceToAsanaMap().at(202), app.sourceToAsanaMap().at(100)]);
+			expect(client.tasks.setParent.getCall(0).args).to.deep.equal([app.sourceToAsanaMap().at(201), app.sourceToAsanaMap().at(100)]);
 		});
 	});
 
@@ -387,7 +387,7 @@ describe("Integration", function() {
 	describe("#_addTasksToTags", function() {
 		it("should add tasks to tags in the correct order", function() {
 			client.tags.createInWorkspace = sinon.spy(createMock);
-			client.workspaces.tags = sinon.stub().returns(Promise.resolve([]));
+			client.tags.findByWorkspace = sinon.stub().returns(Promise.resolve([]));
 			client.tasks.create = sinon.spy(createMock);
 			client.tasks.addTag = sinon.spy(emptyMock);
 
@@ -405,7 +405,7 @@ describe("Integration", function() {
 			importer._addTasksToTags();
 
 			expect(client.tags.createInWorkspace).to.have.callCount(1);
-			expect(client.workspaces.tags).to.have.callCount(1);
+			expect(client.tags.findByWorkspace ).to.have.callCount(1);
 			expect(client.tasks.create).to.have.callCount(2);
 			expect(client.tasks.addTag).to.have.callCount(2);
 			// reversed to get correct order

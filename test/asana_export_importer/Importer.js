@@ -122,7 +122,7 @@ describe("Importer", function() {
 			exp.setMockData({
 				tags: [{ sourceId: 1, name: "tag foo", sourceTeamId: null }]
 			});
-			sinon.stub(client.workspaces, "tags", function() { return Promise.resolve([ { name: "tag foo", id: 1 } ]); });
+			sinon.stub(client.tags, "findByWorkspace", function() { return Promise.resolve([ { name: "tag foo", id: 1 } ]); });
 
 			importer._importTags();
 
@@ -198,8 +198,8 @@ describe("Importer", function() {
 			client.tasks.setParent.callCount.should.equal(2);
 
 			// reversed to get correct order
-			client.tasks.setParent.getCall(1).args.should.deep.equal([app.sourceToAsanaMap().at(201), { parent: app.sourceToAsanaMap().at(100) }])
-			client.tasks.setParent.getCall(0).args.should.deep.equal([app.sourceToAsanaMap().at(200), { parent: app.sourceToAsanaMap().at(100) }])
+			client.tasks.setParent.getCall(1).args.should.deep.equal([app.sourceToAsanaMap().at(201), app.sourceToAsanaMap().at(100)])
+			client.tasks.setParent.getCall(0).args.should.deep.equal([app.sourceToAsanaMap().at(200), app.sourceToAsanaMap().at(100)])
 		});
 	});
 
