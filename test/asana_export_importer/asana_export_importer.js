@@ -21,8 +21,8 @@ describe("asana_export_importer", function() {
 			expect(options.organization).to.equal(0);
 			expect(options.apiKey).to.equal("key");
 			expect(options.apiEndpoint).to.equal(aei.asana.Dispatcher.ROOT_URL);
-			expect(options.attachmentsPath).to.equal("db/attachments.json");
-			expect(options.databasesPath).to.equal("db");
+			expect(options.attachmentsPath).to.equal("attachments.json");
+			expect(options.databasesPath).to.equal("construct_from_path_and_org");
 			expect(options.retries).to.equal(5);
 			expect(options.retryDelay).to.equal(500);
 			expect(options.retryBackoff).to.equal(2);
@@ -38,7 +38,7 @@ describe("asana_export_importer", function() {
 				"--organization=1111",
 				"--importer=something",
 				"--api-endpoint=http://example.com/",
-				"--attachments=db/attachments1.json",
+				"--attachments=attachments1.json",
 				"--databases=db1",
 				"--retries=2222",
 				"--retry-delay=3333",
@@ -57,7 +57,7 @@ describe("asana_export_importer", function() {
 			expect(options.organization).to.equal(1111);
 			expect(options.apiKey).to.equal("key");
 			expect(options.apiEndpoint).to.equal("http://example.com/");
-			expect(options.attachmentsPath).to.equal("db/attachments1.json");
+			expect(options.attachmentsPath).to.equal("attachments1.json");
 			expect(options.databasesPath).to.equal("db1");
 			expect(options.retries).to.equal(2222);
 			expect(options.retryDelay).to.equal(3333);
@@ -75,7 +75,7 @@ describe("asana_export_importer", function() {
 				"--api-key=key",
 				"--organization=1111",
 				"--api-endpoint=http://example.com/",
-				"--attachments=db/attachments1.json",
+				"--attachments=attachments1.json",
 				"--databases=db1",
 				"--retries=0",
 				"--resumable=false",
@@ -90,7 +90,7 @@ describe("asana_export_importer", function() {
 			expect(app.importer().organizationId()).to.equal(1111);
 			expect(app.apiClient().dispatcher.authValue.user).to.equal("key");
 			expect(aei.asana.Dispatcher.ROOT_URL).to.equal("http://example.com/");
-			expect(app.attachmentsPath()).to.equal("db/attachments1.json");
+			expect(app.attachmentsPath()).to.equal("db1/attachments1.json");
 			expect(app.sourceToAsanaMap().dbPath()).to.equal("db1/mapping.sqlite");
 
 			expect(app.clientCache()).to.equal(null);
