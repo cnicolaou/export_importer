@@ -14,8 +14,7 @@ describe("AsanaExport", function() {
 
 		it("should return one user with a list of assigned items", function() {
 			exp.addObject(1, "User", { name: "mike" });
-			exp.addObject(2, "VerifiedEmail", { ve_user: 1, ve_email: "mike@example.com" });
-			exp.addObject(3, "DomainUser", { user: 1, task_list: 4 });
+			exp.addObject(3, "DomainUser", { user: 1, task_list: 4, email: "mike@example.com" });
 			exp.addObject(4, "ItemList", { followers_du: [], name: "My Tasks", is_project: true, assignee: 3, is_archived: false, items: [10,11,12] });
 			exp.prepareForImport();
 
@@ -26,8 +25,7 @@ describe("AsanaExport", function() {
 
 		it("should not return deactivated users", function() {
 			exp.addObject(1, "User", { name: "mike", deactivated: true });
-			exp.addObject(2, "VerifiedEmail", { ve_user: 1, ve_email: "mike@example.com" });
-			exp.addObject(3, "DomainUser", { user: 1, task_list: 4 });
+			exp.addObject(3, "DomainUser", { user: 1, task_list: 4, email: "mike@example.com" });
 			exp.addObject(4, "ItemList", { followers_du: [], name: "My Tasks", is_project: true, assignee: 3, is_archived: false, items: [10,11,12] });
 			exp.prepareForImport();
 
@@ -53,8 +51,7 @@ describe("AsanaExport", function() {
 
 		it("should return the correct members of a team", function() {
 			exp.addObject(1, "User", { name: "mike" });
-			exp.addObject(2, "VerifiedEmail", { ve_user: 1, ve_email: "mike@example.com" });
-			exp.addObject(3, "DomainUser", { user: 1 });
+			exp.addObject(3, "DomainUser", { user: 1, email: "mike@example.com" });
 			exp.addObject(4, "Team", { name: "team1", team_type: "REQUEST_TO_JOIN" });
 			exp.addObject(5, "TeamMembership", { team: 4, member: 3 });
 			exp.prepareForImport();
@@ -66,8 +63,7 @@ describe("AsanaExport", function() {
 
 		it("should not include 'limited_access=true' users in a team", function() {
 			exp.addObject(1, "User", { name: "mike" });
-			exp.addObject(2, "VerifiedEmail", { ve_user: 1, ve_email: "mike@example.com" });
-			exp.addObject(3, "DomainUser", { user: 1 });
+			exp.addObject(3, "DomainUser", { user: 1, email: "mike@example.com" });
 			exp.addObject(4, "Team", { name: "team1", team_type: "REQUEST_TO_JOIN" });
 			exp.addObject(5, "TeamMembership", { team: 4, member: 3, limited_access: true });
 			exp.prepareForImport();
@@ -87,8 +83,7 @@ describe("AsanaExport", function() {
 
 		it("should return one project, no tags or user task lists", function() {
 			exp.addObject(1, "User", { name: "mike" });
-			exp.addObject(2, "VerifiedEmail", { ve_user: 1, ve_email: "mike@example.com" });
-			exp.addObject(3, "DomainUser", { user: 1 });
+			exp.addObject(3, "DomainUser", { user: 1, email: "mike@example.com" });
 			exp.addObject(4, "Team", { name: "team1", team_type: "REQUEST_TO_JOIN" });
 			exp.addObject(5, "ItemList", { followers_du: [], name: "project1", description: "description", is_project: true, is_archived: false, items: [10,11,12], team: 4, stories: [] });
 			exp.addObject(6, "ItemList", { followers_du: [], name: "tag1", is_project: false, is_archived: false, items: [10,11,12], team: 4, stories: [] });
@@ -103,11 +98,9 @@ describe("AsanaExport", function() {
 
         it("should return a project with only followers who are also project members", function() {
             exp.addObject(1, "User", { name: "mike" });
-            exp.addObject(2, "VerifiedEmail", { ve_user: 1, ve_email: "mike@example.com" });
-            exp.addObject(3, "DomainUser", { user: 1 });
+            exp.addObject(3, "DomainUser", { user: 1, email: "mike@example.com" });
             exp.addObject(4, "User", { name: "jim" });
-            exp.addObject(5, "VerifiedEmail", { ve_user: 4, ve_email: "jim@example.com" });
-            exp.addObject(6, "DomainUser", { user: 4 });
+            exp.addObject(6, "DomainUser", { user: 4, email: "jim@example.com" });
             exp.addObject(4, "Team", { name: "team1", team_type: "REQUEST_TO_JOIN" });
             exp.addObject(5, "ItemList", { followers_du: [3, 6], name: "project1", description: "description", is_project: true, is_archived: false, items: [10,11,12], team: 4, stories: [] });
             exp.addObject(6, "ProjectMembership", { project: 5, member: 3 });
@@ -128,8 +121,7 @@ describe("AsanaExport", function() {
 
 		it("should return one tag, no projects or user task lists", function() {
 			exp.addObject(1, "User", { name: "mike" });
-			exp.addObject(2, "VerifiedEmail", { ve_user: 1, ve_email: "mike@example.com" });
-			exp.addObject(3, "DomainUser", { user: 1 });
+			exp.addObject(3, "DomainUser", { user: 1, email: "mike@example.com" });
 			exp.addObject(4, "Team", { name: "team1", team_type: "REQUEST_TO_JOIN" });
 			exp.addObject(5, "ItemList", { followers_du: [], name: "project1", description: "description", is_project: true, is_archived: false, items: [10,11,12], team: 4, stories: [] });
 			exp.addObject(6, "ItemList", { followers_du: [], name: "tag1", is_project: false, is_archived: false, items: [10,11,12], team: 4, stories: [] });
@@ -151,8 +143,7 @@ describe("AsanaExport", function() {
 
 		it("should return one task and subtask with assignee and follower", function() {
 			exp.addObject(1, "User", { name: "mike" });
-			exp.addObject(2, "VerifiedEmail", { ve_user: 1, ve_email: "mike@example.com" });
-			exp.addObject(3, "DomainUser", { user: 1 });
+			exp.addObject(3, "DomainUser", { user: 1, email: "mike@example.com" });
 			exp.addObject(4, "Team", { name: "team1", team_type: "REQUEST_TO_JOIN" });
 			exp.addObject(5, "ItemList", { followers_du: [], name: "project1", description: "description", is_project: true, is_archived: false, items: [7], team: 4, stories: [] });
 			exp.addObject(6, "ItemList", { followers_du: [], name: "tag1", is_project: false, is_archived: false, items: [7], team: 4, stories: [] });
@@ -185,8 +176,7 @@ describe("AsanaExport", function() {
 
 		it("should return task with two stories with reformatted texts", function() {
 			exp.addObject(1, "User", { name: "mike" });
-			exp.addObject(2, "VerifiedEmail", { ve_user: 1, ve_email: "mike@example.com" });
-			exp.addObject(3, "DomainUser", { user: 1 });
+			exp.addObject(3, "DomainUser", { user: 1, email: "mike@example.com"  });
 			exp.addObject(4, "Task", { name: "task1", schedule_status: "UPCOMING", due_date:"2023-11-30 00:00:00", description: "description", attachments: [2], items: [], stories: [5, 7, 6], followers_du: [], __creation_time: "2014-11-16 22:44:11" });
 			exp.addObject(5, "Comment", { creator_du: 3, __creation_time: "2014-11-17 22:44:22", text: "MY COMMENT" });
 			exp.addObject(6, "TaskNameChangedStory", { creator_du: 3, __creation_time: "2014-11-17 22:44:22", text: "changed the name to \"task1\"" });
