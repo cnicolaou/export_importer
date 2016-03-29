@@ -491,6 +491,7 @@ describe("Integration", function() {
 
     describe("#_addAssigneeStatusesToTasks", function() {
         it("should set the assignee status of tasks", function() {
+            client.workspaces.addUser = sinon.spy(createMock);
             client.tasks.create = sinon.spy(createMock);
             client.tasks.update = sinon.spy(createMock);
 
@@ -509,6 +510,7 @@ describe("Integration", function() {
             ]);
 
             importer._importTasks();
+            importer._importUsers();
             importer._addTaskAssigneeStatuses();
 
             expect(client.tasks.update).to.have.callCount(3);

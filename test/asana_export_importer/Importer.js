@@ -281,8 +281,8 @@ describe("Importer", function() {
     describe("#_addAssigneeStatusesToTasks", function() {
         it("should set the assignee status of a task", function() {
             exp.setMockData({
-                users: [{ sourceid: 100, name: "user1", email: "user1@example.com", sourceitemids: [] }],
-                tasks: [{ sourceid: 101, name: "task1", sourcefollowerids: [], assigneeStatus: "today", sourceAssigneeId: 100 }]
+                users: [{ sourceId: 100, name: "user1", email: "user1@example.com", sourceitemids: [] }],
+                tasks: [{ sourceId: 101, name: "task1", sourcefollowerids: [], assigneeStatus: "today", sourceAssigneeId: 100 }]
             });
 
             importer._importTasks();
@@ -297,7 +297,7 @@ describe("Importer", function() {
 
         it("should not set the assignee status of a task with no assignee", function() {
             exp.setMockData({
-                tasks: [{ sourceid: 101, name: "task1", sourcefollowerids: [], assigneeStatus: "today" }]
+                tasks: [{ sourceId: 101, name: "task1", sourcefollowerids: [], assigneeStatus: "today" }]
             });
 
             importer._importTasks();
